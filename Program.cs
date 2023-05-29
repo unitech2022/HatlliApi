@@ -6,6 +6,8 @@ using HattliApi.Data;
 using HattliApi.Serveries;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using HattliApi.Models;
+using HattliApi.Serveries.CategoriesServices;
+using HattliApi.Serveries.ProductsService;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,9 +40,9 @@ var mapper = config.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
 builder.Services.AddScoped<IUserService, UserService>();
-// builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+ builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 // builder.Services.AddScoped<IFieldService, FieldService>();
-// builder.Services.AddScoped<IProductsService, ProductsService>();
+ builder.Services.AddScoped<IProductsService, ProductsService>();
 // builder.Services.AddScoped<ICartsService, CartsService>();
 // builder.Services.AddScoped< IOrderItemsServices, OrderItemsServices>();
 //  builder.Services.AddScoped<IProductsOptionsServices, ProductsOptionsServices>();

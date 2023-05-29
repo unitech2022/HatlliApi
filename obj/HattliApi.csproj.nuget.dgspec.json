@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/gatekee/projects/projectsApi/HattliApi/HattliApi.csproj": {}
+    "F:\\2023\\apiProjects\\HatlliApi\\HattliApi.csproj": {}
   },
   "projects": {
-    "/Users/gatekee/projects/projectsApi/HattliApi/HattliApi.csproj": {
+    "F:\\2023\\apiProjects\\HatlliApi\\HattliApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/gatekee/projects/projectsApi/HattliApi/HattliApi.csproj",
+        "projectUniqueName": "F:\\2023\\apiProjects\\HatlliApi\\HattliApi.csproj",
         "projectName": "HattliApi",
-        "projectPath": "/Users/gatekee/projects/projectsApi/HattliApi/HattliApi.csproj",
-        "packagesPath": "/Users/gatekee/.nuget/packages/",
-        "outputPath": "/Users/gatekee/projects/projectsApi/HattliApi/obj/",
+        "projectPath": "F:\\2023\\apiProjects\\HatlliApi\\HattliApi.csproj",
+        "packagesPath": "C:\\Users\\obama\\.nuget\\packages\\",
+        "outputPath": "F:\\2023\\apiProjects\\HatlliApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/gatekee/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\obama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
@@ -120,7 +120,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.401/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.405\\RuntimeIdentifierGraph.json"
         }
       }
     }

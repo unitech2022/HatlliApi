@@ -130,13 +130,13 @@ namespace HattliApi.Serveries
 
         public async Task<dynamic> Register(UserForRegister userForRegister)
         {
-            dynamic userExist =await IsUserExist(userForRegister);
-            if (userExist != "") {
-                return new {
-                    message = userExist,
-                    status=false
-                };
-            }
+            // dynamic userExist =await IsUserExist(userForRegister);
+            // if (userExist != "") {
+            //     return new {
+            //         message = userExist,
+            //         status=false
+            //     };
+            // }
             userForRegister.Password = "Abc123@";
             var userToCreate = _mapper.Map<User>(userForRegister);
             userToCreate.Role = userForRegister.Role;
@@ -160,13 +160,13 @@ namespace HattliApi.Serveries
                 error = "رقم الهاتف مسجل من قبل";
                 return error;
             }
-            user = await _context.Users.Where(x => x.Email == userForValidate.Email).FirstOrDefaultAsync();
-            if (user != null)
-            {
-                error = "البريد الإلكتروني مسجل من قبل";
-                return error;
+            // user = await _context.Users.Where(x => x.Email == userForValidate.Email).FirstOrDefaultAsync();
+            // if (user != null)
+            // {
+            //     error = "البريد الإلكتروني مسجل من قبل";
+            //     return error;
 
-            }
+            // }
             return error;
 
         }
@@ -190,13 +190,38 @@ namespace HattliApi.Serveries
 
         public async Task<dynamic> LoginUser(UserForLogin userForLogin)
         {
+
             var loginUser = await userManager.FindByNameAsync(userForLogin.UserName);
-            loginUser.DeviceToken = userForLogin.DeviceToken;
-            await _context.SaveChangesAsync();
-            if (loginUser != null && userForLogin.Code == "0000")
+            
+            if (loginUser == null )
             {
                 // Address? address=await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == loginUser.Id && t.DefaultAddress==true);
-                var Token = await GenerateTokenAsync(loginUser);
+             UserForRegister userForRegister=new UserForRegister{
+                Password="Abc123@",
+            Role=userForLogin.Role,
+            UserName=userForLogin.UserName
+             };
+             
+             
+           loginUser = _mapper.Map<User>(userForRegister);
+            loginUser.Role = userForRegister.Role;
+            if (!await _roleManager.RoleExistsAsync(userForRegister.Role))
+                await _roleManager.CreateAsync(new IdentityRole(userForRegister.Role));
+            var result = await userManager.CreateAsync(loginUser, userForRegister.Password);
+            await userManager.AddToRoleAsync(loginUser, userForRegister.Role);
+            string Code = RandomNumber();
+            loginUser.Code = Code;
+            await _context.SaveChangesAsync();
+            }else{
+                   loginUser.DeviceToken = userForLogin.DeviceToken;
+            await _context.SaveChangesAsync();
+            }
+
+            // login 
+            if(userForLogin.Code == "0000"){
+
+             
+                  var Token = await GenerateTokenAsync(loginUser);
                 return new
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(Token),
@@ -240,10 +265,10 @@ namespace HattliApi.Serveries
             {
                 user.City = userForUpdate.City;
             }
-            if (userForUpdate.Birth != null)
-            {
-                user.Birth = userForUpdate.Birth;
-            }
+            // if (userForUpdate.Birth != null)
+            // {
+            //     user.Birth = userForUpdate.Birth;
+            // }
 
             await _context.SaveChangesAsync();
             return true;

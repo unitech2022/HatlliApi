@@ -17,6 +17,9 @@ namespace HattliApi.Data
 
             
         }
+
+        public DbSet<Product>? Products { get; set; }
+      public DbSet<Category>? Categories { get; set; }
         // public DbSet<Address>? Addresses { get; set; }
 
         // public DbSet<Alert>? Alerts { get; set; }
@@ -25,7 +28,6 @@ namespace HattliApi.Data
 
         // public DbSet<Cart>? Carts { get; set; }
 
-        // public DbSet<Category>? Categories { get; set; }
 
         // public DbSet<Field>? Fields { get; set; }
 
@@ -37,7 +39,7 @@ namespace HattliApi.Data
 
         // public DbSet<OrderItemOption>? OrderItemOptions { get; set; }
 
-        // public DbSet<Product>? Products { get; set; }
+        
 
         // public DbSet<ProductsOption>? ProductsOptions { get; set; }
 

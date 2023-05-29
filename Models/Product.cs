@@ -9,32 +9,37 @@ namespace HattliApi.Models
     {
 
         public int Id { get; set; }
+
+        public string? ProviderId { get; set; }
+
+        public int CategoryId { get; set; }
+
+        public int BrandID { get; set; }
+
         public string? Name { get; set; }
-        public string? ImageUrl { get; set; }
 
-        public string? description { get; set; }
+        public string? Description { get; set; }
+        public string? Images { get; set; }
 
+        public double? Price { get; set; }
 
+        public double? Discount { get; set; }
 
-        [NotMapped]
-        public bool IsCart { get; set; }
-        public double? price { get; set; }
-        public string? calories { get; set; }
+         public double? Status { get; set; }
+        public string? Calories { get; set; }
 
-        public int categoryId { get; set; }
-
-        public int restaurantId { get; set; }
-
-
-        public int Status { get; set; }
-
+        public double Rate { get; set; }
+      
         public DateTime CreatedAt { get; set; }
 
         public Product()
         {
 
             CreatedAt = DateTime.Now;
-            IsCart=false;
+            Status=0.0;
+            Rate=0.0;
+            Discount=0.0;
+
 
         }
     }
