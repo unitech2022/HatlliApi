@@ -9,6 +9,13 @@ using HattliApi.Models;
 using HattliApi.Serveries.CategoriesServices;
 using HattliApi.Serveries.ProductsService;
 using Microsoft.AspNetCore.Identity;
+using HattliApi.Serveries.ProvidersService;
+using HatlliApi.Serveries.CartsService;
+using HatlliApi.Serveries.OrdersServices;
+using HatlliApi.Serveries.OrderItems;
+using HatlliApi.Serveries.AddressesServices;
+using HatlliApi.Serveries.AlertsServices;
+using HattliApi.Serveries.HomeService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,22 +47,22 @@ var mapper = config.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
 builder.Services.AddScoped<IUserService, UserService>();
- builder.Services.AddScoped<ICategoriesService, CategoriesService>();
-// builder.Services.AddScoped<IFieldService, FieldService>();
- builder.Services.AddScoped<IProductsService, ProductsService>();
-// builder.Services.AddScoped<ICartsService, CartsService>();
-// builder.Services.AddScoped< IOrderItemsServices, OrderItemsServices>();
-//  builder.Services.AddScoped<IProductsOptionsServices, ProductsOptionsServices>();
-// builder.Services.AddScoped<IOrderItemOptionsServices, OrderItemOptionsServices>();
-// builder.Services.AddScoped<IOrdersServices, OrdersServices>();
+builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+builder.Services.AddScoped<IAddressesServices, AddressesServices>();
+builder.Services.AddScoped<IProductsService, ProductsService>();
+builder.Services.AddScoped<IProvidersService, ProvidersService>();
+builder.Services.AddScoped<ICartsService, CartsService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IOrderItemsServices, OrderItemsServices>();
+builder.Services.AddScoped<IOrdersServices, OrdersServices>();
 // builder.Services.AddScoped<IOffersServices, OffersServices>();
 // builder.Services.AddScoped<IAddressesServices, AddressesServices>();
-// builder.Services.AddScoped<IAlertsServices, AlertsServices>();
+builder.Services.AddScoped<IAlertsServices, AlertsServices>();
 // builder.Services.AddScoped<IAppConfigServices, AppConfigServices>();
-// builder.Services.AddScoped<IHomeService, HomeService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
 // builder.Services.AddScoped<IMarketsService, MarketService>();
 // builder.Services.AddScoped<ICouponService, CouponService>();
-// builder.Services.AddScoped<IRateServices, RateServices>();
+builder.Services.AddScoped<IRateServices, RateServices>();
 // builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 //cors
@@ -120,8 +127,8 @@ builder.Services
 
 var app = builder.Build();
 
- app.UseRouting();
- app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+app.UseRouting();
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 // Configure the HTTP request pipeline.
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

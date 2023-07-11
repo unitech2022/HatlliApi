@@ -109,5 +109,10 @@ namespace HattliApi.Serveries.CategoriesServices
             return (_context.SaveChanges() >= 0);
         }
 
+        public async Task<dynamic> GetAllCategories()
+        {
+             List<Category> categories = await _context.Categories!.ToListAsync();
+             return categories;
+        }
     }
 }

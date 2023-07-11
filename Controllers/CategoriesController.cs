@@ -44,10 +44,10 @@ namespace HattliApi.Controllers
 
         [HttpGet]
         [Route("get-categories")]
-        public async Task<ActionResult> GetCategories([FromQuery] string UserId,[FromQuery]int  page)
+        public async Task<ActionResult> GetCategories()
         {
 
-            return Ok(await _repository.GetCategories(UserId,page));
+            return Ok(await _repository.GetAllCategories());
         }
 
 

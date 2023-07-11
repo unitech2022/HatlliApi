@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-
+using HattliApi.Dtos;
 using HattliApi.Models;
 using HattliApi.ViewModels;
 
@@ -19,8 +19,8 @@ namespace HattliApi.Profils
             // CreateMap<UpdateCategoryDto, Category>();
             // CreateMap<UpdateFieldDto, Field>();
 
-            // CreateMap<UpdateProductDto, Product>();
-            // CreateMap<UpdateCartDto, Cart>();
+            CreateMap<UpdateProductDto, Product>();
+           CreateMap<UpdateCartDto, Cart>();
             //  CreateMap<UpdateOrderDto, Order>();
             //  CreateMap<Cart, Cart>();
             // CreateMap<UpdateOrderItemDto, OrderItem>();

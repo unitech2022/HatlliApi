@@ -12,7 +12,7 @@ namespace HattliApi.Controllers
 {
 
     // STATUS PRODUCT => بترجع الكمية بتاعت المنتج في السلة 
-    
+
     [ApiController]
     [Route("product")]
     public class ProductsController : ControllerBase
@@ -31,10 +31,6 @@ namespace HattliApi.Controllers
         [Route("add-Product")]
         public async Task<ActionResult> AddProduct([FromForm] Product Product)
         {
-            if (Product == null)
-            {
-                return NotFound();
-            }
 
             await _repository.AddProduct(Product);
 
@@ -43,11 +39,11 @@ namespace HattliApi.Controllers
 
 
         [HttpGet]
-        [Route("get-Products")]
-        public async Task<ActionResult> GetProducts([FromQuery] string UserId, [FromQuery] int page)
+        [Route("get-Products-By-providerId")]
+        public async Task<ActionResult> GetProductsByProviderId([FromQuery] int providerId)
         {
 
-            return Ok(await _repository.GetProducts(UserId, page));
+            return Ok(await _repository.GetProductsByProviderId(providerId));
         }
 
 
@@ -59,12 +55,12 @@ namespace HattliApi.Controllers
             return Ok(await _repository.GitProductById(productId));
         }
 
-      [HttpGet]
+        [HttpGet]
         [Route("get-Product-details")]
-        public async Task<ActionResult> GetProductDetails([FromQuery] int productId,[FromQuery] string UserId)
+        public async Task<ActionResult> GetProductDetails([FromQuery] int productId, [FromQuery] string UserId)
         {
 
-            return Ok(await _repository.GitProductDetails(productId,UserId));
+            return Ok(await _repository.GitProductDetails(productId, UserId));
         }
 
         [HttpGet]
@@ -75,9 +71,15 @@ namespace HattliApi.Controllers
             return Ok(await _repository.GitProductsByCategoryId(UserId, page, categoryId));
         }
 
+        [HttpGet]
+        [Route("search-products")]
+        public async Task<ActionResult> SearchProducts([FromQuery] string UserId, [FromQuery] string textSearch,[FromQuery]  int type)
+        {
 
+            return Ok(await _repository.SearchProducts(UserId, textSearch,type));
+        }
 
-         [HttpPut]
+        [HttpPut]
         [Route("update-Product")]
         public async Task<ActionResult> UpdateProduct([FromForm] UpdateProductDto UpdateProduct, [FromForm] int id)
 

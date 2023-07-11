@@ -20,9 +20,7 @@ namespace HattliApi.ViewModels
         // provider
         public string? ProfileImage { get; set; }
 
-        public string? LogoCompany { get; set; }
-
-        public string? ImagePassport { get; set; }
+      
 
         ///     ======================= 
         public string? TypeService { get; set; }

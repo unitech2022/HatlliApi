@@ -9,22 +9,26 @@ namespace HattliApi.Dtos
     {
         
        
+            public int ProviderId { get; set; }
+
+        public int CategoryId { get; set; }
+
+        public int BrandId { get; set; }
+
         public string? Name { get; set; }
-        public string? ImageUrl { get; set; }
 
-        public string? description { get; set; }
+        public string? Description { get; set; }
+        public string? Images { get; set; }
 
+        public string? Sizes { get; set; }
 
+        public double? Price { get; set; }
 
+        // public double? Discount { get; set; }
 
-        public double? price { get; set; }
-        public string? calories { get; set; }
+        //  public double? Status { get; set; }
+        public string? Calories { get; set; }
 
-        public int categoryId { get; set; }
-
-        public int restaurantId { get; set; }
-
-
-        public int Status { get; set; }
+        // public double Rate { get; set; }
     }
 }

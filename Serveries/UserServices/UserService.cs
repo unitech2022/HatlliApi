@@ -15,8 +15,8 @@ using HattliApi.Data;
 
 namespace HattliApi.Serveries
 {
-	public class UserService :IUserService
-	{
+    public class UserService : IUserService
+    {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMapper _mapper;
         private UserManager<User> userManager;
@@ -44,7 +44,8 @@ namespace HattliApi.Serveries
             return fourDigitNumber;
         }
 
-        public async Task<dynamic> GenerateTokenAsync(User loginUser) {
+        public async Task<dynamic> GenerateTokenAsync(User loginUser)
+        {
             var userRoles = await userManager.GetRolesAsync(loginUser);
             var authClaims = new List<Claim>
                 {
@@ -70,10 +71,10 @@ namespace HattliApi.Serveries
             return token;
         }
 
-        public  async Task<bool> ValidateAuth(string authUserId)
+        public async Task<bool> ValidateAuth(string authUserId)
         {
             string userId = _httpContextAccessor.HttpContext.User!.FindFirst(ClaimTypes.NameIdentifier).Value;
-            return userId==authUserId;
+            return userId == authUserId;
         }
 
         public async Task SendSms(string Code, string UserName)
@@ -147,7 +148,7 @@ namespace HattliApi.Serveries
             string Code = RandomNumber();
             userToCreate.Code = Code;
             await _context.SaveChangesAsync();
-            return new {message = Code,status =true };
+            return new { message = Code, status = true };
         }
 
 
@@ -192,36 +193,40 @@ namespace HattliApi.Serveries
         {
 
             var loginUser = await userManager.FindByNameAsync(userForLogin.UserName);
-            
-            if (loginUser == null )
+
+            if (loginUser == null)
             {
                 // Address? address=await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == loginUser.Id && t.DefaultAddress==true);
-             UserForRegister userForRegister=new UserForRegister{
-                Password="Abc123@",
-            Role=userForLogin.Role,
-            UserName=userForLogin.UserName
-             };
-             
-             
-           loginUser = _mapper.Map<User>(userForRegister);
-            loginUser.Role = userForRegister.Role;
-            if (!await _roleManager.RoleExistsAsync(userForRegister.Role))
-                await _roleManager.CreateAsync(new IdentityRole(userForRegister.Role));
-            var result = await userManager.CreateAsync(loginUser, userForRegister.Password);
-            await userManager.AddToRoleAsync(loginUser, userForRegister.Role);
-            string Code = RandomNumber();
-            loginUser.Code = Code;
-            await _context.SaveChangesAsync();
-            }else{
-                   loginUser.DeviceToken = userForLogin.DeviceToken;
-            await _context.SaveChangesAsync();
+                UserForRegister userForRegister = new UserForRegister
+                {
+                    Password = "Abc123@",
+                    Role = userForLogin.Role,
+                    UserName = userForLogin.UserName
+                };
+
+
+                loginUser = _mapper.Map<User>(userForRegister);
+                loginUser.Role = userForRegister.Role;
+                if (!await _roleManager.RoleExistsAsync(userForRegister.Role))
+                    await _roleManager.CreateAsync(new IdentityRole(userForRegister.Role));
+                var result = await userManager.CreateAsync(loginUser, userForRegister.Password);
+                await userManager.AddToRoleAsync(loginUser, userForRegister.Role);
+                string Code = RandomNumber();
+                loginUser.Code = Code;
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                loginUser.DeviceToken = userForLogin.DeviceToken;
+                await _context.SaveChangesAsync();
             }
 
             // login 
-            if(userForLogin.Code == "0000"){
+            if (userForLogin.Code == "0000")
+            {
 
-             
-                  var Token = await GenerateTokenAsync(loginUser);
+
+                var Token = await GenerateTokenAsync(loginUser);
                 return new
                 {
                     token = new JwtSecurityTokenHandler().WriteToken(Token),
@@ -237,7 +242,7 @@ namespace HattliApi.Serveries
             };
         }
 
-        public async Task<bool> UpdateDeviceToken(string Token,string UserId)
+        public async Task<bool> UpdateDeviceToken(string Token, string UserId)
         {
             User user = await _context.Users.Where(x => x.Id == UserId).FirstAsync();
             user.DeviceToken = Token;
@@ -246,24 +251,26 @@ namespace HattliApi.Serveries
 
         }
 
-        public async Task<object> UpdateUser(UserForUpdate userForUpdate) {
+        public async Task<object> UpdateUser(UserForUpdate userForUpdate)
+        {
             User? user = await _context.Users!.Where(x => x.Id == userForUpdate.UserId).FirstOrDefaultAsync();
-            if (user == null) return false;
-            if (userForUpdate.FullName!=null) {
-                user.FullName = userForUpdate.FullName;
-            }
-            if (userForUpdate.Email != null)
+            // if (user == null) return false;
+            if (userForUpdate.FullName != null)
             {
-                user.Email = userForUpdate.Email;
+                user!.FullName = userForUpdate.FullName;
             }
-            if (userForUpdate.Points != null)
-            {
-                user.Points = user.Points+userForUpdate.Points;
-            }
+            // if (userForUpdate.Email != null)
+            // {
+            //     user.Email = userForUpdate.Email;
+            // }
+            // if (userForUpdate.Points != null)
+            // {
+            //     user.Points = user.Points+userForUpdate.Points;
+            // }
 
             if (userForUpdate.City != null)
             {
-                user.City = userForUpdate.City;
+                user!.City = userForUpdate.City;
             }
             // if (userForUpdate.Birth != null)
             // {
@@ -271,11 +278,8 @@ namespace HattliApi.Serveries
             // }
 
             await _context.SaveChangesAsync();
-            return true;
+            return user!;
         }
-
-
-
         public async Task<object> RegisterAdmin(UserForRegister userForRegister)
         {
 
@@ -296,16 +300,17 @@ namespace HattliApi.Serveries
             await userManager.AddToRoleAsync(userToCreate, userForRegister.Role);
 
             await _context.SaveChangesAsync();
-            return new {status = true };
+            return new { status = true };
         }
 
-        public async Task<User> GetUser(string UserId)
+        public async Task<UserDetailResponse> GetUser(string UserId)
         {
             User? user = await _context.Users!.FindAsync(UserId);
-            return user!;
+            UserDetailResponse userDetail = _mapper.Map<UserDetailResponse>(user);
+            return userDetail!;
         }
 
-        
+
     }
 }
 

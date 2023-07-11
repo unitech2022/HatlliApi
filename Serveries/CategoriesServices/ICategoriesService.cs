@@ -13,7 +13,7 @@ namespace HattliApi.Serveries.CategoriesServices
         Task<BaseResponse> GetCategories(string UserId,int page);
 
 
-
+ Task<dynamic> GetAllCategories();
 
         Task<Category> AddCategory(Category category);
 

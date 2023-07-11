@@ -9,6 +9,8 @@ using HattliApi.Models;
 using HattliApi.Models.BaseEntity;
 using HattliApi.ViewModels;
 using X.PagedList;
+using HatlliApi.Helpers;
+using HatlliApi.ViewModels;
 
 namespace HattliApi.Serveries.ProductsService
 {
@@ -30,7 +32,7 @@ namespace HattliApi.Serveries.ProductsService
             // Market? market=await _context.Markets!.FirstOrDefaultAsync(t => t.Id==product.restaurantId);
             // if(market ==null){
 
-               
+
             // }
             await _context.Products!.AddAsync(product);
 
@@ -67,7 +69,7 @@ namespace HattliApi.Serveries.ProductsService
             //      if(cart!=null){
             //         item.Status =cart!.Quantity; 
             //      }
-                
+
 
             //     List<ProductsOption> options = await _context.ProductsOptions!.Where(x => x.ProductId == item.Id).ToListAsync();
             //     ResponseProduct responseProduct = new ResponseProduct
@@ -103,10 +105,16 @@ namespace HattliApi.Serveries.ProductsService
             return baseResponse;
         }
 
+        public async Task<List<Product>> GetProductsByProviderId(int ProviderId)
+        {
+            List<Product> products = await _context.Products!.Where(t => t.ProviderId == ProviderId).ToListAsync();
+            return products;
+        }
+
         public async Task<Product> GitProductById(int ProductId)
         {
             Product? product = await _context.Products!.FirstOrDefaultAsync(x => x.Id == ProductId);
-             
+
             return product!;
         }
 
@@ -114,13 +122,13 @@ namespace HattliApi.Serveries.ProductsService
         {
 
 
-              Product? product = await _context.Products!.FirstOrDefaultAsync(x => x.Id == ProductId);
+            Product? product = await _context.Products!.FirstOrDefaultAsync(x => x.Id == ProductId);
             //   var cart = await _context.Carts!.FirstOrDefaultAsync(x => x.ProductId==ProductId&&x.UserId==UserId);
             //      if(cart!=null){
             //         product!.Status =cart!.Quantity; 
             //      }
             return product!;
-           
+
         }
 
         public async Task<BaseResponse> GitProductsByCategoryId(string UserId, int categoryId, int page)
@@ -133,8 +141,8 @@ namespace HattliApi.Serveries.ProductsService
             //         item!.Status =cart!.Quantity; 
             //      }
             //   }
-                    
-            
+
+
             var pageResults = 10f;
             var pageCount = Math.Ceiling(products.Count() / pageResults);
 
@@ -158,6 +166,44 @@ namespace HattliApi.Serveries.ProductsService
         public bool SaveChanges()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public async Task<List<SearchResponse>> SearchProducts(string userId, string textSearch, int type)
+        {
+            List<SearchResponse> products = new List<SearchResponse>();
+            List<Product> allProducts = new List<Product>();
+            // User? user=await _context.Users!.FirstOrDefaultAsync(t=> t.Id==userId);
+            Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == userId);
+            if (type == 0)
+            {
+                allProducts = await _context.Products!.Where(t => t.Name!.Contains(textSearch)).ToListAsync();
+            }
+            else
+            {
+                Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.UserId == userId);
+                allProducts = await _context.Products!.Where(t => t.Name!.Contains(textSearch) && t.ProviderId == provider!.Id).ToListAsync();
+            }
+
+
+            foreach (Product item in allProducts)
+            {
+                Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == item.ProviderId);
+
+                if (address != null && provider != null)
+                {
+
+                    double distance = Functions.GetDistance(provider!.Lat, address!.Lng, address.Lat, provider.Lng);
+                    provider.Distance = distance;
+                    products.Add(new SearchResponse
+                    {
+                        product = item,
+                        provider = provider
+                    });
+                }
+
+
+            }
+            return products.OrderBy(t => t.provider!.Distance).ToList();
         }
 
         public void UpdateProduct(Product Product)

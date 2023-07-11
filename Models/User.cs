@@ -8,23 +8,18 @@ namespace HattliApi.Models
         public string? Role { get; set; }
         public string? FullName { get; set; }
 
-        public string? NameAdministratorCompany { get; set; }
+      
         public string? DeviceToken { get; set; }
         public int? Status { get; set; }
 
-         public string? About { get; set; }
+    
         public string? Code { get; set; }
 
 
         // provider
         public string? ProfileImage { get; set; }
 
-        public string? LogoCompany { get; set; }
-
-        public string? ImagePassport { get; set; }
-
-        ///     ======================= 
-        public string? TypeService { get; set; }
+        
         public string? City { get; set; }
 
         public double? Points { get; set; }
