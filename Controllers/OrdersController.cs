@@ -38,11 +38,11 @@ namespace HatlliApi.Controllers
 
         [HttpPost]
         [Route("add-order")]
-        public async Task<ActionResult> AddOrder([FromForm] string userId,[FromForm] int payment)
+        public async Task<ActionResult> AddOrder([FromForm] string userId, [FromForm] int payment)
         {
 
 
-            var order = await _repository.AddOrder(userId,payment);
+            var order = await _repository.AddOrder(userId, payment);
 
             return Ok(order);
         }
@@ -108,12 +108,23 @@ namespace HatlliApi.Controllers
 
         [HttpPut]
         [Route("update-Order-status")]
-        public async Task<ActionResult> UpdateOrderStatus([FromForm] int status, [FromForm] int orderId,[FromForm] int sender)
+        public async Task<ActionResult> UpdateOrderStatus([FromForm] int status, [FromForm] int orderId, [FromForm] int sender)
 
         {
 
 
-            return Ok(await _repository.UpdateOrderStatus(orderId, status,sender));
+            return Ok(await _repository.UpdateOrderStatus(orderId, status, sender));
+
+        }
+
+        [HttpPut]
+        [Route("payment-Order")]
+        public async Task<ActionResult> PaymentOrder([FromForm] int orderId, [FromForm] int payment)
+
+        {
+
+
+            return Ok(await _repository.PaymentOrder(orderId, payment));
 
         }
 

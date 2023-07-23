@@ -16,8 +16,7 @@ namespace HattliApi.Models
 
         public string? UserId { get; set; }
 
-
-       public string? Email { get; set; }
+        public string? Email { get; set; }
         public string? About { get; set; }
 
         public string? LogoCompany { get; set; }
@@ -40,6 +39,8 @@ namespace HattliApi.Models
 
         public double Distance { get; set; }
 
+        public double Wallet { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public Provider()
         {
@@ -50,6 +51,7 @@ namespace HattliApi.Models
             Lat = 0.0;
             Lng = 0.0;
             Rate = 0.0;
+            Wallet = 0.0;
 
         }
 

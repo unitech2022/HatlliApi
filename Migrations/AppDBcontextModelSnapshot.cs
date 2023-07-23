@@ -338,6 +338,9 @@ namespace HattliApi.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
 
+                    b.Property<double>("Wallet")
+                        .HasColumnType("double");
+
                     b.Property<double>("discount")
                         .HasColumnType("double");
 

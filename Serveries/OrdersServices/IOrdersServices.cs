@@ -22,6 +22,8 @@ namespace HatlliApi.Serveries.OrdersServices
         
        Task<dynamic> UpdateOrderStatus(int orderId,int status,int sender);
 
+         Task<dynamic> PaymentOrder(int orderId,int payment);
+
         Task<dynamic> GetOrdersUser(string userId);
     }
 }

@@ -161,6 +161,7 @@ namespace HattliApi.Serveries.ProvidersService
             Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == providerId);
             User? user = await _context.Users.FirstOrDefaultAsync(t => t.Id == provider!.UserId);
             UserDetailResponse userDetail = _mapper.Map<UserDetailResponse>(user);
+            Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == userDetail.id);
             List<Product> products = await _context.Products!.Where(t => t.ProviderId == providerId).ToListAsync();
             categories = await _context.Categories!.ToListAsync();
 
@@ -169,7 +170,8 @@ namespace HattliApi.Serveries.ProvidersService
                 provider = provider,
                 products = products,
                 userDetail = userDetail,
-                categories = categories
+                categories = categories,
+                address = address
             };
             //   List<int> idsCategories=provider.CategoryId.s
         }
@@ -217,6 +219,39 @@ namespace HattliApi.Serveries.ProvidersService
 
             }
             return provider1!;
+        }
+
+        public async Task<dynamic> ReviewProvider(int providerId, string from, int to)
+        {
+            // **  to 0 = weekly ; 1 monthly  ;  2 yearly
+
+            List<Order> orders = new List<Order>();
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == providerId);
+            // ** wallet
+            double wallet = provider!.Wallet;
+            DateTime startDate = DateTime.Parse(from);
+            Console.Write("frrrrrom +   " + startDate.ToString());
+            // ** GET  Orders 
+            if (to == 0)
+            {
+
+                orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddDays(7) && t.ProviderId == providerId).ToListAsync();
+            }
+            else if (to == 1)
+            {
+                orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddMonths(1) && t.ProviderId == providerId).ToListAsync();
+
+            }else {
+                  orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddYears(1) && t.ProviderId == providerId).ToListAsync();
+            }
+
+            return new
+            {
+                wallet = wallet,
+                ordersAccepted = orders.Where(t=>t.Status<=3&& t.Status!=0).Count(),
+                 ordersCanceled = orders.Where(t=>t.Status==4).Count()
+                
+            };
         }
 
 

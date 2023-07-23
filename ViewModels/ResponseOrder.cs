@@ -14,6 +14,7 @@ namespace HatlliApi.ViewModels
          public  List<OrderDetails>? Products { get; set; }
 
        public Provider? provider { get; set; }
+         public Address? address { get; set; }
     }
 }
 

@@ -38,7 +38,7 @@ namespace HatlliApi.Serveries.OrdersServices
         // 5 =>  "تم التسليم"
 
 
-        List<string> orderStatuses = new List<string>(new string[] { "في انتظار التأكيد", "تم تأكيد طلبك", "جارى التجهيز", "تم التسليم","تم الغاء الطلب" });
+        List<string> orderStatuses = new List<string>(new string[] { "في انتظار التأكيد", "تم تأكيد طلبك", "جارى التجهيز", "تم التسليم", "تم الغاء الطلب" });
         public OrdersServices(IMapper mapper, AppDBcontext context
         // IAddressesServices addressesServices,
         //  IMarketsService iMarketsService
@@ -80,9 +80,22 @@ namespace HatlliApi.Serveries.OrdersServices
             // double.Parse(appConfigDeliveryCost.Value ?? "0.0") 
             // double deliveryCost = 0.0 * distance;
 
-            // double tax = 0.15 * (productsCost + deliveryCost);
+            double tax = productsCost * .15;
 
             // double totalCost = productsCost + deliveryCost + tax;
+
+            if (payment == 0)
+            {
+
+                market!.Wallet -= tax;
+
+
+            }
+            else
+            {
+                double points = productsCost - tax;
+                market!.Wallet += points;
+            }
 
 
             Order order = new Order
@@ -136,15 +149,32 @@ namespace HatlliApi.Serveries.OrdersServices
             return order!;
         }
 
-
         public async Task<dynamic> UpdateOrderStatus(int typeId, int status, int sender)
         {
+
             //** sender ==0 user || 1  provider
             Order? order = await _context.Orders!.FirstOrDefaultAsync(x => x.Id == typeId);
-
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == order!.ProviderId);
             if (order != null)
             {
                 order.Status = status;
+
+                if (status == 4)
+                {
+                    double tax = order.ProductsCost * .15;
+                    if (order.payment == 0)
+                    {
+
+                        provider!.Wallet += tax;
+
+
+                    }
+                    else
+                    {
+                        double points = order.ProductsCost - tax;
+                        provider!.Wallet -= points;
+                    }
+                }
                 // User? driver = await _context.Users.FirstOrDefaultAsync(t => t.Id == order.DriverId);
                 // if (driver != null)
                 // {
@@ -155,20 +185,55 @@ namespace HatlliApi.Serveries.OrdersServices
                 // }
                 if (sender == 0)
                 {
-                    await Functions.SendNotificationAsync(_context, order.UserId!,  order.Id,"تعديل حالة الطلب", orderStatuses[status], "");
+                    await Functions.SendNotificationAsync(_context, order.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "");
 
 
                 }
                 else
                 {
-                    Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == order.ProviderId);
-                    await Functions.SendNotificationAsync(_context, provider!.UserId!,  order.Id,"تعديل حالة الطلب", orderStatuses[status], "");
+
+
+
+                    await Functions.SendNotificationAsync(_context, provider!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "");
+
+
+
+
                 }
+
 
                 await _context.SaveChangesAsync();
             }
 
             return order!;
+        }
+
+        public async Task<dynamic> PaymentOrder(int orderId, int payment)
+        {
+            Order? order = await _context.Orders!.FirstOrDefaultAsync(x => x.Id == orderId);
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == order!.ProviderId);
+
+            double tax = order!.TotalCost! * 15 / 100;
+            // ** payment == 0  cash 
+
+            if (payment == 0)
+            {
+                provider!.Wallet -= tax;
+
+
+            }
+            else
+            {
+                double points = order!.TotalCost! - tax;
+                provider!.Wallet += points;
+            }
+            order.Status = 3;
+            await _context.SaveChangesAsync();
+            await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[3], "");
+
+            return order;
+
+
         }
 
         public async Task<dynamic> GetItems(string UserId, int page)
@@ -209,8 +274,7 @@ namespace HatlliApi.Serveries.OrdersServices
 
             List<OrderDetails> orderDetails = new List<OrderDetails>();
             Order? order = await _context.Orders!.FirstOrDefaultAsync(t => t.Id == orderId);
-            Console.WriteLine(order + "MARKET");
-
+            Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == order!.UserId);
             Provider? market = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == order!.ProviderId);
 
             foreach (OrderItem item in orderItems)
@@ -246,11 +310,13 @@ namespace HatlliApi.Serveries.OrdersServices
             }
 
 
+
             return new ResponseOrder
             {
                 Products = orderDetails,
                 provider = market,
-                order = order
+                order = order,
+                address = address
             };
 
         }
@@ -307,6 +373,8 @@ namespace HatlliApi.Serveries.OrdersServices
 
             return orders;
         }
+
+
 
         // public async Task<dynamic> AcceptOrderDriver(int orderId, string driverId)
         // {

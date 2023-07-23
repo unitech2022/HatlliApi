@@ -166,6 +166,7 @@ namespace HattliApi.Serveries
             // {
             //     error = "البريد الإلكتروني مسجل من قبل";
             //     return error;
+            
 
             // }
             return error;
@@ -186,7 +187,7 @@ namespace HattliApi.Serveries
 
                 };
             }
-            return false;
+            return loginUser!;
         }
 
         public async Task<dynamic> LoginUser(UserForLogin userForLogin)

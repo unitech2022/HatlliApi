@@ -16,6 +16,7 @@ using HatlliApi.Serveries.OrderItems;
 using HatlliApi.Serveries.AddressesServices;
 using HatlliApi.Serveries.AlertsServices;
 using HattliApi.Serveries.HomeService;
+using HatlliApi.Serveries.DashboardServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +56,7 @@ builder.Services.AddScoped<ICartsService, CartsService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IOrderItemsServices, OrderItemsServices>();
 builder.Services.AddScoped<IOrdersServices, OrdersServices>();
-// builder.Services.AddScoped<IOffersServices, OffersServices>();
+builder.Services.AddScoped<IDashboardServices, DashboardServices>();
 // builder.Services.AddScoped<IAddressesServices, AddressesServices>();
 builder.Services.AddScoped<IAlertsServices, AlertsServices>();
 // builder.Services.AddScoped<IAppConfigServices, AppConfigServices>();

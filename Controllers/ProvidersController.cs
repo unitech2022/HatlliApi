@@ -109,5 +109,14 @@ namespace HattliApi.Controllers
             return Ok(await _repository.UpdateProvider(provider));
         }
 
+
+        [HttpPost]
+        [Route("review-provider")]
+        public async Task<ActionResult> ReviewProvider([FromForm] int providerId,[FromForm] int to,[FromForm] string from)
+        {
+
+            return Ok(await _repository.ReviewProvider(providerId,from,to));
+        }
+
     }
 }

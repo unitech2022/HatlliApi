@@ -96,7 +96,7 @@ namespace HattliApi.Controllers
 		public async Task<IActionResult> LoginAdmin([FromForm] AdminForLoginRequest adminForLogin)
 		{
 			dynamic result = await _service!.LoginAdmin(adminForLogin);
-            if (result == false)
+            if (result == null)
             {
 				return Unauthorized();
             }

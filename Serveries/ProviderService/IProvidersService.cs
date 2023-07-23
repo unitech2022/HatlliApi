@@ -21,6 +21,10 @@ Task<Provider> GitProviderByUserId(string  userId);
       Task<List<Provider>> GetProvidersByFieldId(int fieldId,string UserId);
 
         Task<Provider> UpdateProvider(Provider provider);
+
+
+          Task<dynamic> ReviewProvider(int providerId,string from ,int to);
+
     }
 
     

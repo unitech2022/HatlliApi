@@ -24,7 +24,7 @@ namespace HattliApi.Dtos
 
         public double? Price { get; set; }
 
-        // public double? Discount { get; set; }
+         public double? Discount { get; set; }
 
         //  public double? Status { get; set; }
         public string? Calories { get; set; }
