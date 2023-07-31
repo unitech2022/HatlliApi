@@ -17,13 +17,15 @@ namespace HattliApi.Serveries.ProvidersService
 Task<Provider> GitProviderByUserId(string  userId);
          Task<List<Provider>> SearchProvider(string  textSearch,int addressId);
 
-   Task<dynamic> DetailsProvider(int providerId);
+   Task<dynamic> DetailsProvider(int providerId,string userId);
       Task<List<Provider>> GetProvidersByFieldId(int fieldId,string UserId);
 
         Task<Provider> UpdateProvider(Provider provider);
 
 
-          Task<dynamic> ReviewProvider(int providerId,string from ,int to);
+          Task<dynamic> ReviewProvider(string userId,string from ,int to);
+
+            Task<dynamic> BalanceWithdrawalProvider(string userId,double mony ,int type);
 
     }
 

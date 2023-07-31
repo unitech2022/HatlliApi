@@ -17,6 +17,7 @@ using HatlliApi.Serveries.AddressesServices;
 using HatlliApi.Serveries.AlertsServices;
 using HattliApi.Serveries.HomeService;
 using HatlliApi.Serveries.DashboardServices;
+using HatlliApi.Serveries.RateServices;
 
 var builder = WebApplication.CreateBuilder(args);
 

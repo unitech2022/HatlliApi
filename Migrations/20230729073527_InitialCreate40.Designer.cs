@@ -3,6 +3,7 @@ using System;
 using HattliApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HattliApi.Migrations
 {
     [DbContext(typeof(AppDBcontext))]
-    partial class AppDBcontextModelSnapshot : ModelSnapshot
+    [Migration("20230729073527_InitialCreate40")]
+    partial class InitialCreate40
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,29 +42,6 @@ namespace HattliApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Favorites");
-                });
-
-            modelBuilder.Entity("HatlliApi.Models.OrderWallet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<double>("Mony")
-                        .HasColumnType("double");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OrderWallets");
                 });
 
             modelBuilder.Entity("HattliApi.Models.Address", b =>

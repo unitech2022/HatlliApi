@@ -10,13 +10,13 @@ using Microsoft.EntityFrameworkCore;
 
 using X.PagedList;
 
-namespace HatlliApi.Serveries.AddressesServices
+namespace HatlliApi.Serveries.RateServices
 {
     public class RateServices : IRateServices
     {
-          private readonly IMapper _mapper;
+        private readonly IMapper _mapper;
 
-       
+
         private readonly AppDBcontext _context;
 
         public RateServices(IMapper mapper, AppDBcontext context)
@@ -27,8 +27,8 @@ namespace HatlliApi.Serveries.AddressesServices
 
         public async Task<dynamic> AddAsync(dynamic type)
         {
-             await _context.Addresses!.AddAsync(type);
-             
+            await _context.Addresses!.AddAsync(type);
+
             await _context.SaveChangesAsync();
 
             return type;
@@ -36,46 +36,70 @@ namespace HatlliApi.Serveries.AddressesServices
 
         public async Task<dynamic> AddRate(Rate rate)
         {
-             Rate? checkRate=await _context.Rates!.FirstOrDefaultAsync(t => t.UserId ==rate.UserId&&t.MarketId==rate.MarketId);
-            Provider? market = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == rate.MarketId);
-           if(checkRate==null){
+            Rate? checkRate = await _context.Rates!.FirstOrDefaultAsync(t => t.UserId == rate.UserId && t.ProductId == rate.ProductId);
+            Product? product = await _context.Products!.FirstOrDefaultAsync(t => t.Id == rate.ProductId);
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == product!.ProviderId);
+            if (checkRate == null)
+            {
 
-           await _context.Rates!.AddAsync(rate);
-            _context.SaveChanges();
-            List<Rate> rates = await _context.Rates!.Where(t => t.MarketId == rate.MarketId).ToListAsync();
-           
-            //culact rate WorkShop
-            int rateConte = rates.Count();
-            // Console.WriteLine("rateConte"+rateConte);
-            int stars = rates.Sum(t => t.Stare);
-            // Console.WriteLine("stars"+stars);
-            double totalRate= stars / rateConte;
-            // Console.WriteLine("rate"+totalRate);
-            market!.Rate =totalRate; 
-            _context.SaveChanges();
-            return new{
-                message ="تم التقييم بنجاح ",
-                rate =rate
-            };
-           }else {
-            List<Rate> rates = await _context.Rates!.Where(t => t.MarketId == rate.MarketId).ToListAsync();
-            checkRate.Stare =rate.Stare;
-            int rateConte = rates.Count();
-            // Console.WriteLine("rateConte"+rateConte);
-            int stars = rates.Sum(t => t.Stare);
-            // Console.WriteLine("stars"+stars);
-            double totalRate= stars / rateConte;
-            // Console.WriteLine("rate"+totalRate);
-            market!.Rate =totalRate; 
-            _context.SaveChanges();
-          
+                await _context.Rates!.AddAsync(rate);
+                _context.SaveChanges();
+                List<Rate> rates = await _context.Rates!.Where(t => t.ProductId == rate.ProductId).ToListAsync();
 
-            return new {
-                message="تم تعديل التقييم ",
-                rate =rate
-            };
-           }
-             
+
+                // ** rate ptoduct
+                //culact rate WorkShop
+                int rateConte = rates.Count();
+                Console.WriteLine("rateConte" + rateConte);
+                int stars = rates.Sum(t => t.Stare);
+                Console.WriteLine("stars" + stars);
+                double totalRate = stars / rateConte;
+                Console.WriteLine("rate" + totalRate);
+                product!.Rate = totalRate;
+
+
+
+
+                //** rate provider
+                //culact rate WorkShop
+                List<Product> products = await _context.Products!.Where(t => t.ProviderId == product.ProviderId).ToListAsync();
+                int rateConteProvider = products.Count();
+                Console.WriteLine("rateConte" + rateConteProvider);
+                double starsProvider = products.Sum(t => t.Rate);
+                Console.WriteLine("stars" + stars);
+                double totalRateProvider = starsProvider / rateConteProvider;
+                Console.WriteLine("rate" + totalRateProvider);
+                provider!.Rate = totalRateProvider;
+
+                await _context.SaveChangesAsync();
+
+                return new
+                {
+                    message = "تم التقييم بنجاح ",
+                    rate = rate
+                };
+            }
+            else
+            {
+                List<Rate> rates = await _context.Rates!.Where(t => t.ProductId == rate.ProductId).ToListAsync();
+                checkRate.Stare = rate.Stare;
+                int rateConte = rates.Count();
+                // Console.WriteLine("rateConte"+rateConte);
+                int stars = rates.Sum(t => t.Stare);
+                // Console.WriteLine("stars"+stars);
+                double totalRate = stars / rateConte;
+                Console.WriteLine("rate" + totalRate);
+                product!.Rate = totalRate;
+                await _context.SaveChangesAsync();
+
+
+                return new
+                {
+                    message = "تم تعديل التقييم ",
+                    rate = rate
+                };
+            }
+
         }
 
 
@@ -95,8 +119,8 @@ namespace HatlliApi.Serveries.AddressesServices
 
         public async Task<dynamic> GetItems(string UserId, int page)
         {
-            List<Address> addresses = await _context.Addresses!.OrderByDescending(t => t.DefaultAddress).Where(i => i.UserId==UserId ).ToListAsync();
-           
+            List<Address> addresses = await _context.Addresses!.OrderByDescending(t => t.DefaultAddress).Where(i => i.UserId == UserId).ToListAsync();
+
             //  if(addresses.Count > 0){
             //     Address? defaultAddress= addresses!.FirstOrDefault(t => t.DefaultAddress=true);
             //     if(defaultAddress != null){

@@ -37,7 +37,7 @@ namespace HattliApi.Data
 
         public DbSet<OrderItem>? OrderItems { get; set; }
 
-        // public DbSet<OrderItemOption>? OrderItemOptions { get; set; }
+       public DbSet<OrderWallet>? OrderWallets { get; set; }
 
 
 

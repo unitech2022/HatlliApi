@@ -3,6 +3,7 @@ using System;
 using HattliApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HattliApi.Migrations
 {
     [DbContext(typeof(AppDBcontext))]
-    partial class AppDBcontextModelSnapshot : ModelSnapshot
+    [Migration("20230729073831_InitialCreate41")]
+    partial class InitialCreate41
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,9 +55,6 @@ namespace HattliApi.Migrations
 
                     b.Property<double>("Mony")
                         .HasColumnType("double");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");

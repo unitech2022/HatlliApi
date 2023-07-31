@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HattliApi.Core;
 using HattliApi.Models;
 
-namespace HatlliApi.Serveries.AddressesServices
+namespace HatlliApi.Serveries.RateServices
 {
     public interface IRateServices :BaseInterface
     {

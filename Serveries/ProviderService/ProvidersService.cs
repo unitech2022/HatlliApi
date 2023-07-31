@@ -11,6 +11,7 @@ using HattliApi.Models.BaseEntity;
 using HattliApi.ViewModels;
 using X.PagedList;
 using HatlliApi.Helpers;
+using HatlliApi.Models;
 
 namespace HattliApi.Serveries.ProvidersService
 {
@@ -146,7 +147,7 @@ namespace HattliApi.Serveries.ProvidersService
                 double distance = Functions.GetDistance(item.Lat, address!.Lng, address.Lat, item.Lng);
                 item.Distance = distance;
             }
-            return providers;
+            return providers.OrderByDescending(t => t.Rate).ToList();
         }
 
         public async Task<Provider> GitProviderByUserId(string userId)
@@ -155,15 +156,38 @@ namespace HattliApi.Serveries.ProvidersService
             return provider!;
         }
 
-        public async Task<dynamic> DetailsProvider(int providerId)
+        public async Task<dynamic> DetailsProvider(int providerId, string userId)
         {
             List<Category> categories = new List<Category> { };
             Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == providerId);
             User? user = await _context.Users.FirstOrDefaultAsync(t => t.Id == provider!.UserId);
             UserDetailResponse userDetail = _mapper.Map<UserDetailResponse>(user);
-            Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == userDetail.id);
+            Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == provider!.UserId);
+
+
+
             List<Product> products = await _context.Products!.Where(t => t.ProviderId == providerId).ToListAsync();
+            //** rate provider
+
+
             categories = await _context.Categories!.ToListAsync();
+
+
+            Address? addressUser = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == userId);
+            
+                if (addressUser != null)
+                {
+
+
+                    double distance = Functions.GetDistance(provider!.Lat, addressUser!.Lng, addressUser.Lat, provider!.Lng);
+                    provider!.Distance = distance;
+
+
+
+                }
+            
+
+
 
             return new
             {
@@ -221,40 +245,74 @@ namespace HattliApi.Serveries.ProvidersService
             return provider1!;
         }
 
-        public async Task<dynamic> ReviewProvider(int providerId, string from, int to)
+        public async Task<dynamic> ReviewProvider(string userId, string from, int to)
         {
             // **  to 0 = weekly ; 1 monthly  ;  2 yearly
 
             List<Order> orders = new List<Order>();
-            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == providerId);
+            List<Product> products = new List<Product>();
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.UserId == userId);
             // ** wallet
             double wallet = provider!.Wallet;
             DateTime startDate = DateTime.Parse(from);
-            Console.Write("frrrrrom +   " + startDate.ToString());
+            // Console.Write("frrrrrom +   " + startDate.ToString());
             // ** GET  Orders 
             if (to == 0)
             {
 
-                orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddDays(7) && t.ProviderId == providerId).ToListAsync();
+                orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddDays(7) && t.ProviderId == provider.Id).ToListAsync();
+                 products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddDays(7) && t.ProviderId == provider.Id).ToListAsync();
             }
             else if (to == 1)
             {
-                orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddMonths(1) && t.ProviderId == providerId).ToListAsync();
+                orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddMonths(1) && t.ProviderId == provider.Id).ToListAsync();
+                  products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddMonths(1) && t.ProviderId == provider.Id).ToListAsync();
 
-            }else {
-                  orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddYears(1) && t.ProviderId == providerId).ToListAsync();
+            }
+            else
+            {
+                orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddYears(1) && t.ProviderId == provider.Id).ToListAsync();
+                 products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddYears(1) && t.ProviderId == provider.Id).ToListAsync();
             }
 
             return new
             {
                 wallet = wallet,
-                ordersAccepted = orders.Where(t=>t.Status<=3&& t.Status!=0).Count(),
-                 ordersCanceled = orders.Where(t=>t.Status==4).Count()
-                
+                ordersAccepted = orders.Where(t => t.Status <= 3).Count(),
+                ordersCanceled = orders.Count(),
+                products=products.Count()
+
             };
         }
 
+        public async Task<dynamic> BalanceWithdrawalProvider(string userId, double mony, int type)
+        {
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.UserId == userId);
+            if (type == 0)
+            {
+                provider!.Wallet -= mony;
 
+
+
+            }
+            else
+            {
+                mony = provider!.Wallet;
+                provider!.Wallet = 0.0;
+            }
+
+            OrderWallet orderWallet = new OrderWallet
+            {
+                UserId = userId,
+                Mony = mony,
+
+            };
+
+            await _context.OrderWallets!.AddAsync(orderWallet);
+
+            await _context.SaveChangesAsync();
+            return orderWallet;
+        }
 
 
 

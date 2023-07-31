@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using HatlliApi.Serveries.AddressesServices;
+using HatlliApi.Serveries.RateServices;
 using HattliApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

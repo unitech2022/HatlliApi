@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using HattliApi.Models;
 
 using HattliApi.Serveries.ProvidersService;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HattliApi.Controllers
 {
@@ -95,10 +96,10 @@ namespace HattliApi.Controllers
 
         [HttpGet]
         [Route("get-provider-details")]
-        public async Task<ActionResult> DetailsProvider([FromQuery] int providerId)
+        public async Task<ActionResult> DetailsProvider([FromQuery] int providerId, [FromQuery] string userId)
         {
 
-            return Ok(await _repository.DetailsProvider(providerId));
+            return Ok(await _repository.DetailsProvider(providerId, userId));
         }
 
         [HttpPost]
@@ -112,10 +113,18 @@ namespace HattliApi.Controllers
 
         [HttpPost]
         [Route("review-provider")]
-        public async Task<ActionResult> ReviewProvider([FromForm] int providerId,[FromForm] int to,[FromForm] string from)
+        public async Task<ActionResult> ReviewProvider([FromForm] string userId, [FromForm] int to, [FromForm] string from)
         {
 
-            return Ok(await _repository.ReviewProvider(providerId,from,to));
+            return Ok(await _repository.ReviewProvider(userId, from, to));
+        }
+        [Authorize(Roles = "provider")]
+        [HttpPost]
+        [Route("BalanceWithdrawal-provider")]
+        public async Task<ActionResult> ReviewProvider([FromForm] string userId, [FromForm] double mony, [FromForm] int type)
+        {
+
+            return Ok(await _repository.BalanceWithdrawalProvider(userId, mony, type));
         }
 
     }

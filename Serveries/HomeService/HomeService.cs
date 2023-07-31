@@ -40,7 +40,7 @@ namespace HattliApi.Serveries.HomeService
             User? user = await _context.Users!.FirstOrDefaultAsync(t => t.Id == UserId);
             UserDetailResponse userDetail = _mapper.Map<UserDetailResponse>(user);
 
-            List<Alert> alerts = await _context.Alerts!.Where(t => t.UserId == UserId&&!t.Viewed).ToListAsync();
+            List<Alert> alerts = await _context.Alerts!.Where(t => t.UserId == UserId && !t.Viewed).ToListAsync();
             //** provider
             Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.UserId == UserId);
 
@@ -59,13 +59,13 @@ namespace HattliApi.Serveries.HomeService
                 foreach (var item in allOrders)
                 {
                     User? userOrder = await _context.Users!.FirstOrDefaultAsync(t => t.Id == item.UserId);
-                    Address? addressUser=await _context.Addresses!.FirstOrDefaultAsync(t=>t.UserId==item.UserId);
+                    Address? addressUser = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == item.UserId);
                     orders.Add(new OrderHome
                     {
                         order = item,
                         name = userOrder!.FullName,
                         imageUrl = userOrder.ProfileImage,
-                        address=addressUser
+                        address = addressUser
 
                     });
 
@@ -93,13 +93,13 @@ namespace HattliApi.Serveries.HomeService
             List<OrderHome> orders = new List<OrderHome> { };
             //** address
             Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == UserId);
-  //** categories
+            //** categories
             List<Category> categories = await _context.Categories!.ToListAsync();
             //** get user
             User? user = await _context.Users!.FirstOrDefaultAsync(t => t.Id == UserId);
             UserDetailResponse userDetail = _mapper.Map<UserDetailResponse>(user);
-            List<Alert> alerts = await _context.Alerts!.Where(t => t.UserId == UserId&&!t.Viewed).ToListAsync();
- // ** carts
+            List<Alert> alerts = await _context.Alerts!.Where(t => t.UserId == UserId && !t.Viewed).ToListAsync();
+            // ** carts
             List<Cart> carts = await _context.Carts!.Where(t => t.UserId == UserId).ToListAsync();
             //** get providers
             List<Provider> providers = await _context.Providers!.ToListAsync();
@@ -142,8 +142,8 @@ namespace HattliApi.Serveries.HomeService
                 user = userDetail,
                 favorites = favorites,
                 carts = carts,
-                categories=categories,
-                
+                categories = categories,
+
             };
 
 

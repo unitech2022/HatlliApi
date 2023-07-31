@@ -104,7 +104,7 @@ namespace HatlliApi.Serveries.OrdersServices
                 UserId = userId,
                 Notes = "",
                 payment = payment,
-                TotalCost = productsCost,
+                TotalCost = productsCost + 2,
                 ProductsCost = productsCost,
             };
 
@@ -175,17 +175,10 @@ namespace HatlliApi.Serveries.OrdersServices
                         provider!.Wallet -= points;
                     }
                 }
-                // User? driver = await _context.Users.FirstOrDefaultAsync(t => t.Id == order.DriverId);
-                // if (driver != null)
-                // {
-                //     if (status != 4)
-                //     {
-                //         driver.Status = "Active";
-                //     }
-                // }
+               
                 if (sender == 0)
                 {
-                    await Functions.SendNotificationAsync(_context, order.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "");
+                    await Functions.SendNotificationAsync(_context, provider!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "");
 
 
                 }
@@ -194,7 +187,7 @@ namespace HatlliApi.Serveries.OrdersServices
 
 
 
-                    await Functions.SendNotificationAsync(_context, provider!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "");
+                    await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "");
 
 
 

@@ -142,8 +142,10 @@ namespace HatlliApi.Helpers
                         body = body,
                         title = title,
                     },
+                  
                     click_action = "FLUTTER_NOTIFICATION_CLICK",
                     priority = "high",
+                    modelId = modelId
 
                 };
 
