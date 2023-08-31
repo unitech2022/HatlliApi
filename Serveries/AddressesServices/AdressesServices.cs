@@ -14,9 +14,9 @@ namespace HatlliApi.Serveries.AddressesServices
 {
     public class AddressesServices : IAddressesServices
     {
-          private readonly IMapper _mapper;
+        private readonly IMapper _mapper;
 
-       
+
         private readonly AppDBcontext _context;
 
         public AddressesServices(IMapper mapper, AppDBcontext context)
@@ -27,33 +27,36 @@ namespace HatlliApi.Serveries.AddressesServices
 
         public async Task<dynamic> AddAsync(dynamic type)
         {
-             await _context.Addresses!.AddAsync(type);
+            await _context.Addresses!.AddAsync(type);
 
             await _context.SaveChangesAsync();
 
             return type;
         }
 
-        public async Task<dynamic> DefaultAddress(int typeId,string userId)
+        public async Task<dynamic> DefaultAddress(int typeId, string userId)
         {
 
-            List<Address> addresses =await _context.Addresses!.Where(t => t.UserId ==userId).ToListAsync();
+            List<Address> addresses = await _context.Addresses!.Where(t => t.UserId == userId).ToListAsync();
 
             foreach (Address item in addresses)
             {
-                if(item.Id == typeId){
-                    item.DefaultAddress=true;
-                
-            }else {
-                item.DefaultAddress=false;
+                if (item.Id == typeId)
+                {
+                    item.DefaultAddress = true;
+
+                }
+                else
+                {
+                    item.DefaultAddress = false;
+                }
             }
-            }
-            await  _context.SaveChangesAsync();
-            Address? address=await _context.Addresses!.FirstOrDefaultAsync(t => t.Id ==typeId&& t.UserId == userId);
+            await _context.SaveChangesAsync();
+            Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.Id == typeId && t.UserId == userId);
 
             return address!;
-              
-            
+
+
         }
 
         public async Task<dynamic> DeleteAsync(int typeId)
@@ -72,8 +75,8 @@ namespace HatlliApi.Serveries.AddressesServices
 
         public async Task<dynamic> GetItems(string UserId, int page)
         {
-            List<Address> addresses = await _context.Addresses!.OrderByDescending(t => t.DefaultAddress).Where(i => i.UserId==UserId ).ToListAsync();
-           
+            List<Address> addresses = await _context.Addresses!.OrderByDescending(t => t.DefaultAddress).Where(i => i.UserId == UserId).ToListAsync();
+
             //  if(addresses.Count > 0){
             //     Address? defaultAddress= addresses!.FirstOrDefault(t => t.DefaultAddress=true);
             //     if(defaultAddress != null){
@@ -108,9 +111,26 @@ namespace HatlliApi.Serveries.AddressesServices
             return address!;
         }
 
+        public async Task<dynamic> GetAddressByUserId(string userId)
+        {
+            Address? address = await _context.Addresses!.FirstOrDefaultAsync(x => x.UserId == userId);
+            return address!;
+        }
+
         public bool SaveChanges()
         {
             return (_context.SaveChanges() >= 0);
+        }
+
+        public async Task<dynamic> UpdateAddress(Address address)
+        {
+            Address? addressFind = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == address.UserId);
+            addressFind!.Lat = address.Lat;
+            addressFind!.Lng = address.Lng;
+            addressFind!.Name = address.Name;
+            addressFind!.Description = address.Description;
+            await _context.SaveChangesAsync();
+            return addressFind;
         }
 
         public void UpdateObject(dynamic category)

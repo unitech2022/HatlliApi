@@ -20,5 +20,6 @@ namespace HatlliApi.ViewModels
         public UserDetailResponse? user{ get; set; }
 
         public int NotiyCount { get; set; }
+        
     }
 }

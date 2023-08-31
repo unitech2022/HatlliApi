@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using HattliApi.Data;
 using HattliApi.Models;
 using HattliApi.Models.BaseEntity;
 using Microsoft.EntityFrameworkCore;
-
+using HattliApi.ViewModels;
 using X.PagedList;
-
+using HatlliApi.ViewModels;
 namespace HatlliApi.Serveries.RateServices
 {
     public class RateServices : IRateServices
@@ -83,6 +79,7 @@ namespace HatlliApi.Serveries.RateServices
             {
                 List<Rate> rates = await _context.Rates!.Where(t => t.ProductId == rate.ProductId).ToListAsync();
                 checkRate.Stare = rate.Stare;
+                 checkRate.Comment = rate.Comment;
                 int rateConte = rates.Count();
                 // Console.WriteLine("rateConte"+rateConte);
                 int stars = rates.Sum(t => t.Stare);
@@ -101,7 +98,6 @@ namespace HatlliApi.Serveries.RateServices
             }
 
         }
-
 
         public async Task<dynamic> DeleteAsync(int typeId)
         {
@@ -154,6 +150,24 @@ namespace HatlliApi.Serveries.RateServices
             throw new NotImplementedException();
         }
 
+
+        public async Task<List<RateProductResponse>> GetRatesByProductId(int productId)
+        {
+          List<RateProductResponse> rats=new List<RateProductResponse>();
+
+            List<Rate> allRates = await _context.Rates!.OrderByDescending(t => t.CreateAte).Where(i => i.ProductId == productId).ToListAsync();
+            foreach (Rate item in allRates)
+            {
+                User? user=await _context.Users.FirstOrDefaultAsync(t=> t.Id==item.UserId);
+                UserDetailResponse userDetails= _mapper.Map<UserDetailResponse>(user);
+                RateProductResponse rateProductResponse=new RateProductResponse{
+                    rate=item,
+                    user=userDetails
+                };
+                rats.Add(rateProductResponse);
+            }
+            return rats;
+        }
         public bool SaveChanges()
         {
             return (_context.SaveChanges() >= 0);

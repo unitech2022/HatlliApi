@@ -34,7 +34,7 @@ namespace HattliApi.Models
         public Order()
         {
 
-            CreatedAt = DateTime.Now;
+            CreatedAt = DateTime.Now.AddHours(3);
             Status=0;
 
         }

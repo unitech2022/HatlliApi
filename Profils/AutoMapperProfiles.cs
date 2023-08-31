@@ -16,7 +16,7 @@ namespace HattliApi.Profils
             CreateMap<UserForRegister, User>();
             CreateMap<User, UserDetailResponse>();
 
-            // CreateMap<UpdateCategoryDto, Category>();
+            CreateMap<UpdateCategoryDto, Category>();
             // CreateMap<UpdateFieldDto, Field>();
 
             CreateMap<UpdateProductDto, Product>();

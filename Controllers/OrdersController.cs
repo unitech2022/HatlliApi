@@ -38,11 +38,11 @@ namespace HatlliApi.Controllers
 
         [HttpPost]
         [Route("add-order")]
-        public async Task<ActionResult> AddOrder([FromForm] string userId, [FromForm] int payment)
+        public async Task<ActionResult> AddOrder([FromForm] string userId, [FromForm] int payment,[FromForm]string nots)
         {
 
 
-            var order = await _repository.AddOrder(userId, payment);
+            var order = await _repository.AddOrder(userId, payment,nots);
 
             return Ok(order);
         }

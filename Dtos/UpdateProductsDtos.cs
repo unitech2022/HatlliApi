@@ -9,11 +9,11 @@ namespace HattliApi.Dtos
     {
         
        
-            public int ProviderId { get; set; }
+           public int ProviderId { get; set; }
 
         public int CategoryId { get; set; }
 
-        public int BrandId { get; set; }
+        public string? BrandId { get; set; }
 
         public string? Name { get; set; }
 
@@ -24,11 +24,10 @@ namespace HattliApi.Dtos
 
         public double? Price { get; set; }
 
-         public double? Discount { get; set; }
+        public double? Discount { get; set; }
 
-        //  public double? Status { get; set; }
+       
         public string? Calories { get; set; }
-
         // public double Rate { get; set; }
     }
 }

@@ -118,7 +118,7 @@ namespace HattliApi.Controllers
 
             return Ok(await _repository.ReviewProvider(userId, from, to));
         }
-        [Authorize(Roles = "provider")]
+        // [Authorize(Roles = "provider")]
         [HttpPost]
         [Route("BalanceWithdrawal-provider")]
         public async Task<ActionResult> ReviewProvider([FromForm] string userId, [FromForm] double mony, [FromForm] int type)

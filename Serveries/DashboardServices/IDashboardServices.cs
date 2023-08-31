@@ -15,14 +15,21 @@ namespace HatlliApi.Serveries.DashboardServices
            Task<object> UpdateStatusProvider(int providerId,int status);
 
           Task<BaseResponse> GetProviders(int page,string textSearch);
+           Task<List<Category>> GetCategories();
 
           Task<BaseResponse> GetProducts(int page,string textSearch);
 
+
            Task<BaseResponse> GetUsers(int page,string textSearch);
 
+              Task<BaseResponse> GetWallets(int page);
+
+           Task<object> UpdateStatusWallet(int walletId,int status);   
             Task<object> UpdateStatusProduct(int productId,int status);   
 
               Task<BaseResponse> GetOrders(int page);
+
+                Task<dynamic> PaymentProvider(string userId , double mony,int type );
 
              
     }

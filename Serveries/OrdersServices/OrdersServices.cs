@@ -9,6 +9,7 @@ using HatlliApi.ViewModels;
 using HattliApi.Data;
 using HattliApi.Models;
 using HattliApi.Models.BaseEntity;
+using HattliApi.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 using X.PagedList;
@@ -63,7 +64,7 @@ namespace HatlliApi.Serveries.OrdersServices
             return type;
         }
 
-        public async Task<dynamic> AddOrder(string userId, int payment)
+        public async Task<dynamic> AddOrder(string userId, int payment, string nots)
         {
             List<Cart> carts = await _context.Carts!.Where(x => x.UserId == userId).ToListAsync();
 
@@ -77,6 +78,10 @@ namespace HatlliApi.Serveries.OrdersServices
 
             // double distance = Functions.GetDistance(address.Lat, market.Lat, address.Lng, market.Lng);
             double productsCost = carts.Sum(i => i.Cost);
+            if (payment == 1)
+            {
+                productsCost += 1;
+            }
             // double.Parse(appConfigDeliveryCost.Value ?? "0.0") 
             // double deliveryCost = 0.0 * distance;
 
@@ -102,10 +107,11 @@ namespace HatlliApi.Serveries.OrdersServices
             {
                 ProviderId = market!.Id,
                 UserId = userId,
-                Notes = "",
+                Notes = nots,
                 payment = payment,
                 TotalCost = productsCost + 2,
                 ProductsCost = productsCost,
+
             };
 
 
@@ -130,7 +136,7 @@ namespace HatlliApi.Serveries.OrdersServices
             _context.OrderItems!.AddRange(orderItemsToAdd);
             _context.Carts!.RemoveRange(carts);
             _context.SaveChanges();
-            await Functions.SendNotificationAsync(_context, market!.UserId!, order.Id, "طلب جديد", "تم ارسال طلب جديد", "");
+            await Functions.SendNotificationAsync(_context, market!.UserId!, order.Id, "طلب جديد", "تم ارسال طلب جديد", "", "orders");
             return order;
         }
 
@@ -175,10 +181,10 @@ namespace HatlliApi.Serveries.OrdersServices
                         provider!.Wallet -= points;
                     }
                 }
-               
+
                 if (sender == 0)
                 {
-                    await Functions.SendNotificationAsync(_context, provider!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "");
+                    await Functions.SendNotificationAsync(_context, provider!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "", "orders");
 
 
                 }
@@ -187,7 +193,7 @@ namespace HatlliApi.Serveries.OrdersServices
 
 
 
-                    await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "");
+                    await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "", "orders");
 
 
 
@@ -222,7 +228,7 @@ namespace HatlliApi.Serveries.OrdersServices
             }
             order.Status = 3;
             await _context.SaveChangesAsync();
-            await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[3], "");
+            await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[3], "", "orders");
 
             return order;
 
@@ -268,6 +274,8 @@ namespace HatlliApi.Serveries.OrdersServices
             List<OrderDetails> orderDetails = new List<OrderDetails>();
             Order? order = await _context.Orders!.FirstOrDefaultAsync(t => t.Id == orderId);
             Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == order!.UserId);
+            User? user = await _context.Users.FirstOrDefaultAsync(t => t.Id == order!.UserId);
+            UserDetailResponse userDetailResponse = _mapper.Map<UserDetailResponse>(user);
             Provider? market = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == order!.ProviderId);
 
             foreach (OrderItem item in orderItems)
@@ -309,7 +317,8 @@ namespace HatlliApi.Serveries.OrdersServices
                 Products = orderDetails,
                 provider = market,
                 order = order,
-                address = address
+                address = address,
+                userDetail = userDetailResponse
             };
 
         }
@@ -333,12 +342,13 @@ namespace HatlliApi.Serveries.OrdersServices
 
         public async Task<dynamic> GitOrdersByMarketId(int marketId)
         {
-            List<Order> orders = await _context.Orders!.Where(t => t.ProviderId == marketId).ToListAsync();
+            List<Order> orders = await _context.Orders!.OrderByDescending(t => t.CreatedAt).Where(t => t.ProviderId == marketId).ToListAsync();
+
 
             return new
             {
-                successOrders = orders.Where(t => t.Status == 5).ToList(),
-                unsuccessfulOrders = orders.Where(t => t.Status == -1).ToList(),
+                successOrders = orders.Where(t => t.Status <= 3 && t.Status != 0).ToList(),
+                unsuccessfulOrders = orders.Where(t => t.Status == 4).ToList(),
             };
         }
 
@@ -354,15 +364,15 @@ namespace HatlliApi.Serveries.OrdersServices
 
             return new
             {
-                currentOrders = orders.Where(t => t.DriverId == driverId && t.Status == 0).ToList(),
-                successOrders = orders.Where(t => t.DriverId == driverId && t.Status == 5).ToList(),
-                unsuccessfulOrders = orders.Where(t => t.DriverId == driverId && t.Status == -1).ToList(),
+                currentOrders = orders.OrderByDescending(t => t.CreatedAt).Where(t => t.DriverId == driverId && t.Status == 0).ToList(),
+                successOrders = orders.OrderByDescending(t => t.CreatedAt).Where(t => t.DriverId == driverId && t.Status == 5).ToList(),
+                unsuccessfulOrders = orders.OrderByDescending(t => t.CreatedAt).Where(t => t.DriverId == driverId && t.Status == -1).ToList(),
             };
         }
 
         public async Task<dynamic> GetOrdersUser(string userId)
         {
-            List<Order> orders = await _context.Orders!.Where(i => i.UserId == userId).ToListAsync();
+            List<Order> orders = await _context.Orders!.OrderByDescending(t => t.CreatedAt).Where(i => i.UserId == userId).ToListAsync();
 
             return orders;
         }

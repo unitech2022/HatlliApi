@@ -27,6 +27,10 @@ namespace HattliApi.Models
 
         public string? AddressName { get; set; }
 
+          public string? IBan { get; set; }
+
+        public string? NameBunk { get; set; }
+
         public double Lat { get; set; }
 
         public double Lng { get; set; }
@@ -36,6 +40,8 @@ namespace HattliApi.Models
         public int Status { get; set; }
 
         public double discount { get; set; }
+
+         public double Area { get; set; }
 
         public double Distance { get; set; }
 

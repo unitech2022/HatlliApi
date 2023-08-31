@@ -92,7 +92,7 @@ namespace HattliApi.Serveries.ProvidersService
         {
             Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.Id == addressId);
             List<Provider> markets = new List<Provider>();
-            List<Provider> allMarkets = await _context.Providers!.Where(p => p.Title!.Contains(textSearch)).ToListAsync();
+            List<Provider> allMarkets = await _context.Providers!.Where(p => p.Title!.Contains(textSearch) && p.Status != 1).ToListAsync();
             // Address? userAddress = await _context.Providers!.FirstOrDefaultAsync(x => x.Id == AddressId);
             // foreach (var market in allMarkets)
             // {
@@ -127,25 +127,30 @@ namespace HattliApi.Serveries.ProvidersService
 
         public async Task<List<Provider>> GetProvidersByFieldId(int fieldId, string UserId)
         {
-            List<Provider> providers = new List<Provider> { };
+            List<Provider> providers = new List<Provider>();
+            List<Provider> allProviders = new List<Provider>();
             Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == UserId);
             if (fieldId == 0)
             {
-                providers = await _context.Providers!.ToListAsync();
+                allProviders = await _context.Providers!.Where(t => t.Status == 1).ToListAsync();
 
 
             }
             else
             {
-                providers = await _context.Providers!.Where(t => t.CategoryId == fieldId).ToListAsync();
+                allProviders = await _context.Providers!.Where(t => t.CategoryId == fieldId && t.Status == 1).ToListAsync();
             }
 
 
             // git distance
-            foreach (var item in providers)
+            foreach (var item in allProviders)
             {
                 double distance = Functions.GetDistance(item.Lat, address!.Lng, address.Lat, item.Lng);
-                item.Distance = distance;
+                if (distance <= item.Area)
+                {
+                    item.Distance = distance;
+                    providers.Add(item);
+                }
             }
             return providers.OrderByDescending(t => t.Rate).ToList();
         }
@@ -166,7 +171,7 @@ namespace HattliApi.Serveries.ProvidersService
 
 
 
-            List<Product> products = await _context.Products!.Where(t => t.ProviderId == providerId).ToListAsync();
+            List<Product> products = await _context.Products!.Where(t => t.ProviderId == providerId && t.Status == 0).ToListAsync();
             //** rate provider
 
 
@@ -174,25 +179,25 @@ namespace HattliApi.Serveries.ProvidersService
 
 
             Address? addressUser = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == userId);
-            
-                if (addressUser != null)
-                {
+
+            if (addressUser != null)
+            {
 
 
-                    double distance = Functions.GetDistance(provider!.Lat, addressUser!.Lng, addressUser.Lat, provider!.Lng);
-                    provider!.Distance = distance;
+                double distance = Functions.GetDistance(provider!.Lat, addressUser!.Lng, addressUser.Lat, provider!.Lng);
+                provider!.Distance = distance;
 
 
 
-                }
-            
+            }
+
 
 
 
             return new
             {
                 provider = provider,
-                products = products,
+                products = products.Take(10).ToList(),
                 userDetail = userDetail,
                 categories = categories,
                 address = address
@@ -219,7 +224,10 @@ namespace HattliApi.Serveries.ProvidersService
                 {
                     provider1.Email = provider.Email;
                 }
-
+                if (provider.Area != provider1.Area)
+                {
+                    provider1.Area = provider.Area;
+                }
                 if (provider.ImagePassport != null)
                 {
                     provider1.ImagePassport = provider.ImagePassport;
@@ -236,6 +244,16 @@ namespace HattliApi.Serveries.ProvidersService
                 if (provider.CategoryId != provider1.CategoryId)
                 {
                     provider1.CategoryId = provider.CategoryId;
+                }
+
+                if (provider.IBan != provider1.IBan)
+                {
+                    provider1.IBan = provider.IBan;
+                }
+
+                if (provider.NameBunk != provider1.NameBunk)
+                {
+                    provider1.NameBunk = provider.NameBunk;
                 }
 
                 await _context.SaveChangesAsync();
@@ -261,18 +279,46 @@ namespace HattliApi.Serveries.ProvidersService
             {
 
                 orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddDays(7) && t.ProviderId == provider.Id).ToListAsync();
-                 products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddDays(7) && t.ProviderId == provider.Id).ToListAsync();
+                products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddDays(7) && t.ProviderId == provider.Id).ToListAsync();
             }
             else if (to == 1)
             {
                 orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddMonths(1) && t.ProviderId == provider.Id).ToListAsync();
-                  products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddMonths(1) && t.ProviderId == provider.Id).ToListAsync();
+                products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddMonths(1) && t.ProviderId == provider.Id).ToListAsync();
 
             }
             else
             {
                 orders = await _context.Orders!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddYears(1) && t.ProviderId == provider.Id).ToListAsync();
-                 products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddYears(1) && t.ProviderId == provider.Id).ToListAsync();
+                products = await _context.Products!.Where(t => t.CreatedAt >= startDate && t.CreatedAt < startDate.AddYears(1) && t.ProviderId == provider.Id).ToListAsync();
+            }
+
+            /// **  must orders area
+            //  var grouped = orders.GroupBy(item => item.UserId);
+            //  var sorted = grouped.OrderByDescending(group => group.Count());
+            Address? address = new Address
+            {
+                Id = 0,
+                Lat = 0.0,
+                Lng = 0.0,
+                Description = "",
+                UserId = "dhf",
+                Name = "name",
+                CreatedAt = DateTime.Now
+            };
+
+
+            if (orders.Count > 0)
+            {
+                var grp = orders.GroupBy(i => i.UserId).ToList();
+                int max = grp.Max(c => c.Count());
+                var most = grp.Where(d => d.Count() == max)
+                              .Select(c => c.Key).ToList();
+
+                //     Order? order = most.First();
+                //     int countOrder=most.Where(t=> t.UserId==order.UserId).Count();
+                address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == most.First());
+                address!.Id = max;
             }
 
             return new
@@ -280,7 +326,9 @@ namespace HattliApi.Serveries.ProvidersService
                 wallet = wallet,
                 ordersAccepted = orders.Where(t => t.Status <= 3).Count(),
                 ordersCanceled = orders.Count(),
-                products=products.Count()
+                products = products.Count(),
+                provider = provider,
+                most = address
 
             };
         }

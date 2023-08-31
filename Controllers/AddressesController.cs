@@ -11,15 +11,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HatlliApi.Controllers
 {
-//  dotnet commends
-
-// dotnet publish --configuration Release
-// migrations dotnet
-// dotnet ef migrations add InitialCreate
- // update database 
-// dotnet ef database update
-// create
-// dotnet new webapi -n name 
+    //  dotnet commends
+    // dotnet publish --configuration Release
+    // migrations dotnet
+    // dotnet ef migrations add InitialCreate
+    // update database 
+    // dotnet ef database update
+    // create
+    // dotnet new webapi -n name 
 
     [ApiController]
     [Route("address")]
@@ -33,7 +32,6 @@ namespace HatlliApi.Controllers
             _repository = repository;
             _mapper = mapper;
         }
-
 
 
         [HttpPost]
@@ -50,6 +48,34 @@ namespace HatlliApi.Controllers
             return Ok(address);
         }
 
+
+        [HttpPost]
+        [Route("update-address")]
+        public async Task<ActionResult> UpdateAddress([FromForm] Address address)
+        {
+            if (address == null)
+            {
+                return NotFound();
+            }
+
+            await _repository.UpdateAddress(address);
+
+            return Ok(address);
+        }
+
+
+        [HttpGet]
+        [Route("get-address-by-userId")]
+        public async Task<ActionResult> GetAddressByUserId([FromQuery] string userId)
+        {
+            Address address = await _repository.GetAddressByUserId(userId);
+            if (address == null)
+            {
+
+                return NotFound();
+            }
+            return Ok(address);
+        }
 
         [HttpGet]
         [Route("get-addresses")]
@@ -72,27 +98,24 @@ namespace HatlliApi.Controllers
             return Ok(address);
         }
 
+        // [HttpPut]
+        // [Route("update-address")]
+        // public async Task<ActionResult> UpdateAddress([FromForm] UpdateAddressDto UpdateAddress, [FromForm] int id)
 
+        // {
+        //     Address address = await _repository.GitById(id);
+        //     if (address == null)
+        //     {
+        //         return NotFound();
+        //     }
+        //     _mapper.Map(UpdateAddress, address);
 
+        //     _repository.UpdateObject(address);
+        //     _repository.SaveChanges();
 
-        [HttpPut]
-        [Route("update-address")]
-        public async Task<ActionResult> UpdateAddress([FromForm] UpdateAddressDto UpdateAddress, [FromForm] int id)
-
-        {
-            Address address = await _repository.GitById(id);
-            if (address == null)
-            {
-                return NotFound();
-            }
-            _mapper.Map(UpdateAddress, address);
-
-            _repository.UpdateObject(address);
-            _repository.SaveChanges();
-
-            return Ok(address);
-        }
-
+        //     return Ok(address);
+        // }
+       
         [HttpPost]
         [Route("delete-address")]
         public async Task<ActionResult> DeleteAddress([FromForm] int addressId)

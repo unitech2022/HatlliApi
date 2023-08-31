@@ -109,11 +109,11 @@ namespace HattliApi.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Page")
-                        .HasColumnType("longtext");
-
                     b.Property<int>("PageId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
@@ -180,6 +180,9 @@ namespace HattliApi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NameEng")
                         .HasColumnType("longtext");
 
                     b.Property<int>("Status")
@@ -266,8 +269,8 @@ namespace HattliApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("BrandId")
-                        .HasColumnType("int");
+                    b.Property<string>("BrandId")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Calories")
                         .HasColumnType("longtext");
@@ -322,6 +325,9 @@ namespace HattliApi.Migrations
                     b.Property<string>("AddressName")
                         .HasColumnType("longtext");
 
+                    b.Property<double>("Area")
+                        .HasColumnType("double");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -332,6 +338,9 @@ namespace HattliApi.Migrations
                         .HasColumnType("double");
 
                     b.Property<string>("Email")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("IBan")
                         .HasColumnType("longtext");
 
                     b.Property<string>("ImagePassport")
@@ -347,6 +356,9 @@ namespace HattliApi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("NameAdministratorCompany")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NameBunk")
                         .HasColumnType("longtext");
 
                     b.Property<double>("Rate")

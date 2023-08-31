@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using HattliApi.Models;
+using HattliApi.ViewModels;
 
 namespace HatlliApi.ViewModels
 {
@@ -15,6 +16,8 @@ namespace HatlliApi.ViewModels
 
        public Provider? provider { get; set; }
          public Address? address { get; set; }
+
+         public UserDetailResponse? userDetail { get; set; }
     }
 }
 

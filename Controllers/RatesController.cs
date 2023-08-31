@@ -35,5 +35,15 @@ namespace HatlliApi.Controllers
 
         }
 
+
+        [HttpGet]
+        [Route("rates-product")]
+        public async Task<ActionResult> GetRatsProduct([FromQuery] int productId)
+        {
+
+            return Ok(await _repository.GetRatesByProductId(productId));
+
+        }
+
     }
 }

@@ -46,6 +46,14 @@ namespace HattliApi.Controllers
             return Ok(await _repository.GetProductsByProviderId(providerId));
         }
 
+        
+        [HttpGet]
+        [Route("get-Products-By-providerId-page")]
+        public async Task<ActionResult> GetProductsByProviderIdPage([FromQuery] int providerId, [FromQuery] int page)
+        {
+
+            return Ok(await _repository.GitProductsByProviderIdPage(providerId, page));
+        }
 
         [HttpGet]
         [Route("get-Product-byId")]
@@ -73,10 +81,10 @@ namespace HattliApi.Controllers
 
         [HttpGet]
         [Route("search-products")]
-        public async Task<ActionResult> SearchProducts([FromQuery] string UserId, [FromQuery] string textSearch,[FromQuery]  int type)
+        public async Task<ActionResult> SearchProducts([FromQuery] string UserId, [FromQuery] string textSearch, [FromQuery] int type)
         {
 
-            return Ok(await _repository.SearchProducts(UserId, textSearch,type));
+            return Ok(await _repository.SearchProducts(UserId, textSearch, type));
         }
 
         [HttpPut]

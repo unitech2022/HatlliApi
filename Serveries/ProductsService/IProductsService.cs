@@ -17,6 +17,7 @@ namespace HattliApi.Serveries.ProductsService
 
         Task<BaseResponse> GitProductsByCategoryId(string UserId, int categoryId, int page);
 
+ Task<BaseResponse> GitProductsByProviderIdPage( int providerId, int page);
         Task<Product> AddProduct(Product Product);
 
         Task<Product> GitProductById(int ProductId);

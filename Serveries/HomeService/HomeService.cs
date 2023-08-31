@@ -50,11 +50,11 @@ namespace HattliApi.Serveries.HomeService
             if (provider != null)
             {
                 //** products
-                products = await _context.Products!.Where(t => t.ProviderId == provider!.Id).ToListAsync();
+                products = await _context.Products!.OrderByDescending(t=> t.CreatedAt).Where(t => t.ProviderId == provider!.Id).ToListAsync();
 
                 // ** orders 
 
-                List<Order> allOrders = await _context.Orders!.Where(t => t.ProviderId == provider!.Id).ToListAsync();
+                List<Order> allOrders = await _context.Orders!.OrderByDescending(t=> t.CreatedAt).Where(t => t.ProviderId == provider!.Id).ToListAsync();
 
                 foreach (var item in allOrders)
                 {
@@ -76,7 +76,7 @@ namespace HattliApi.Serveries.HomeService
             return new ResponseHomeProvider
             {
                 orders = orders,
-                Products = products,
+                Products = products.Take(10).ToList(),
                 provider = provider,
                 user = userDetail,
                 address = address,
@@ -90,6 +90,7 @@ namespace HattliApi.Serveries.HomeService
         public async Task<ResponseHomeUser> GetHomeUserData(string UserId)
         {
             List<Order> allOrders = new List<Order> { };
+            List<Provider> providers = new List<Provider> { };
             List<OrderHome> orders = new List<OrderHome> { };
             //** address
             Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == UserId);
@@ -102,22 +103,29 @@ namespace HattliApi.Serveries.HomeService
             // ** carts
             List<Cart> carts = await _context.Carts!.Where(t => t.UserId == UserId).ToListAsync();
             //** get providers
-            List<Provider> providers = await _context.Providers!.ToListAsync();
+            List<Provider> allProviders = await _context.Providers!.Where(t=>t.Status==1 && t.Wallet> -100).ToListAsync();
             // get distance
             if (address != null)
             {
 
-                foreach (var item in providers)
+                foreach (Provider item in allProviders)
                 {
+                  
                     double distance = Functions.GetDistance(item.Lat, address!.Lng, address.Lat, item.Lng);
-                    item.Distance = distance;
+                    if (distance <= item.Area)
+                    {
+                        item.Distance = distance;
+                        providers.Add(item);
+                    }
+
+
 
 
                 }
             }
 
             // ** orders
-            allOrders = await _context.Orders!.Where(t => t.UserId == UserId).ToListAsync();
+            allOrders = await _context.Orders!.OrderByDescending(t=> t.CreatedAt).Where(t => t.UserId == UserId).ToListAsync();
             foreach (var item in allOrders)
             {
                 Provider? provider1 = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == item.ProviderId);

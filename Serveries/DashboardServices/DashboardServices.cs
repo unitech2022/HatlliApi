@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using HatlliApi.Models;
 using HatlliApi.ViewModels;
 using HattliApi.Data;
 using HattliApi.Models;
@@ -34,12 +35,12 @@ namespace HatlliApi.Serveries.DashboardServices
 
             int providers = _context.Providers!.ToList().Count;
             int products = _context.Products!.ToList().Count;
-            int orders = _context.Orders!.ToList().Count;
+            int orders = _context.Categories!.ToList().Count;
             int users = _context.Users!.Where(t => t.Role == "user").ToList().Count;
 
             if (providers > 10)
             {
-                lastProviders = await _context.Providers!.OrderByDescending(t => t.CreatedAt).Skip(10).ToListAsync();
+                lastProviders = await _context.Providers!.OrderByDescending(t => t.CreatedAt).Take(10).ToListAsync();
             }
             else
             {
@@ -90,7 +91,7 @@ namespace HatlliApi.Serveries.DashboardServices
 
             }
 
-            var pageResults = 10f;
+            var pageResults =30f;
             var pageCount = Math.Ceiling(products.Count() / pageResults);
 
             var items = await products
@@ -121,7 +122,7 @@ namespace HatlliApi.Serveries.DashboardServices
             }
 
 
-            var pageResults = 10f;
+            var pageResults = 30f;
             var pageCount = Math.Ceiling(providers.Count() / pageResults);
 
             var items = await providers
@@ -225,7 +226,7 @@ namespace HatlliApi.Serveries.DashboardServices
 
             }
 
-            var pageResults = 10f;
+            var pageResults = 30f;
             var pageCount = Math.Ceiling(users.Count() / pageResults);
 
             var items = await users
@@ -240,6 +241,90 @@ namespace HatlliApi.Serveries.DashboardServices
             };
 
             return baseResponse;
+        }
+
+        public async Task<BaseResponse> GetWallets(int page)
+        {
+            List<WalletResponse> walletResponses = new List<WalletResponse>();
+            List<OrderWallet> orderWallets = await _context.OrderWallets!.OrderByDescending(t => t.CreatedAt).ToListAsync();
+
+            foreach (var item in orderWallets)
+            {
+                Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.UserId == item.UserId);
+                User? user = await _context.Users!.FirstOrDefaultAsync(t => t.Id == item.UserId);
+                UserDetailResponse? userDetailResponse = _mapper.Map<UserDetailResponse>(user);
+                walletResponses.Add(new WalletResponse
+                {
+                    wallet = item,
+                    userDetail = userDetailResponse,
+                    provider = provider
+                });
+
+            }
+
+            var pageResults = 30f;
+            var pageCount = Math.Ceiling(walletResponses.Count() / pageResults);
+
+            var items = await walletResponses
+                .Skip((page - 1) * (int)pageResults)
+                .Take((int)pageResults)
+                .ToListAsync();
+            BaseResponse baseResponse = new BaseResponse
+            {
+                Items = items,
+                CurrentPage = page,
+                TotalPages = (int)pageCount
+            };
+
+            return baseResponse;
+        }
+
+        public async Task<object> UpdateStatusWallet(int walletId, int status)
+        {
+            OrderWallet? wallet = await _context.OrderWallets!.FirstOrDefaultAsync(t => t.Id == walletId);
+            if (wallet != null)
+            {
+                wallet.Status = status;
+                await _context.SaveChangesAsync();
+            }
+            return wallet!;
+        }
+
+        public async Task<List<Category>> GetCategories()
+        {
+            List<Category> categories = await _context.Categories!.ToListAsync();
+
+            return categories;
+        }
+
+        public async Task<dynamic> PaymentProvider(string userId, double mony, int type)
+        {
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.UserId == userId);
+            if (provider != null)
+            {
+                // *** minus
+                if (type == 0)
+                {
+                    if (mony == 0)
+                    {
+                        provider.Wallet = 0.0;
+
+                    }
+                    else
+                    {
+                        provider.Wallet = provider.Wallet - mony;
+
+                    }
+                    // ** add 
+                }else {
+                    
+                     provider.Wallet = provider.Wallet + mony;
+                }
+
+            }
+
+            await _context.SaveChangesAsync();
+            return provider!;
         }
     }
 }

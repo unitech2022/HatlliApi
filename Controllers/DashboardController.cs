@@ -40,6 +40,13 @@ namespace HatlliApi.Controllers
             return Ok(await _repository.GetProviders(page, textSearch));
         }
 
+      [HttpPost]
+        [Route("get-categories")]
+        public async Task<ActionResult> GetCategories()
+        {
+            return Ok(await _repository.GetCategories());
+        }
+
 
         [Authorize(Roles = "admin")]
         [HttpPost]
@@ -49,6 +56,21 @@ namespace HatlliApi.Controllers
             return Ok(await _repository.UpdateStatusProvider(providerId, status));
         }
 
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        [Route("update-wallet")]
+        public async Task<ActionResult> UpdateWalletStatus([FromForm] int walletId, [FromForm] int status)
+        {
+            return Ok(await _repository.UpdateStatusWallet(walletId, status));
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        [Route("get-wallets")]
+        public async Task<ActionResult> GetOrdersWallets([FromForm] int page)
+        {
+            return Ok(await _repository.GetWallets(page));
+        }
 
 
         [HttpPost]
@@ -79,6 +101,16 @@ namespace HatlliApi.Controllers
         public async Task<ActionResult> UpdateProductStatus([FromForm] int productId, [FromForm] int status)
         {
             return Ok(await _repository.UpdateStatusProduct(productId, status));
+        }
+
+
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        [Route("payment-provider")]
+        public async Task<ActionResult> payMentProvider([FromForm] string userId, [FromForm] double mony ,[FromForm] int type)
+        {
+            return Ok(await _repository.PaymentProvider(userId, mony,type));
         }
     }
 }

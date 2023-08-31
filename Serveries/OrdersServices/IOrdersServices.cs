@@ -10,7 +10,7 @@ namespace HatlliApi.Serveries.OrdersServices
     public interface IOrdersServices : BaseInterface
     {
 
-        Task<dynamic> AddOrder(string userId,int payment);
+        Task<dynamic> AddOrder(string userId,int payment,string nots);
 
         Task<dynamic> GitOrderDetails(int orderId);
 

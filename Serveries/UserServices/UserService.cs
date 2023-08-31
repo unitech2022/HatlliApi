@@ -74,6 +74,7 @@ namespace HattliApi.Serveries
         public async Task<bool> ValidateAuth(string authUserId)
         {
             string userId = _httpContextAccessor.HttpContext.User!.FindFirst(ClaimTypes.NameIdentifier).Value;
+
             return userId == authUserId;
         }
 
@@ -83,14 +84,15 @@ namespace HattliApi.Serveries
             {
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+
                 var data = new
 
                 {
-                    userName = "",
+                    userName = "tall3at",
                     numbers = UserName,
-                    userSender = "",
-                    apiKey = "",
-                    msg = "كود التفعيل   :   " + Code
+                    userSender = "tall3at",
+                    apiKey = "35cc2cd49e6eaf1a17ff287b3a8b7df3",
+                    msg = "رمز التحقق: " + Code
 
                 };
 
@@ -101,8 +103,7 @@ namespace HattliApi.Serveries
                 System.Diagnostics.Debug.WriteLine(result.Content.ReadAsStringAsync());
             }
         }
-
-        public async Task<object> IsUserRegistered(string UserName)
+        public async Task<object> IsUserRegistered(string UserName, string userRole)
         {
             User? user = await _context.Users!.Where(x => x.UserName == UserName).FirstOrDefaultAsync();
             string Code = RandomNumber();
@@ -111,15 +112,41 @@ namespace HattliApi.Serveries
             {
                 user.Code = Code;
                 await _context.SaveChangesAsync();
-                //await SendSms(Code, UserName);
+
+               await SendSms(Code, UserName);
+
+
                 return new
                 {
                     status = 1,
                     Code = Code,
                 };
+
             }
             else
             {
+
+                UserForRegister userForRegister = new UserForRegister
+                {
+                    Password = "Abc123@",
+                    Role = userRole,
+                    UserName = UserName
+                };
+
+
+                var loginUser = _mapper.Map<User>(userForRegister);
+                loginUser.Role = userForRegister.Role;
+                if (!await _roleManager.RoleExistsAsync(userForRegister.Role))
+                    await _roleManager.CreateAsync(new IdentityRole(userForRegister.Role));
+                var result = await userManager.CreateAsync(loginUser, userForRegister.Password);
+                await userManager.AddToRoleAsync(loginUser, userForRegister.Role);
+                loginUser.Code = Code;
+                await _context.SaveChangesAsync();
+
+                await SendSms(Code, UserName);
+
+
+
                 return new
                 {
                     status = 0,
@@ -166,7 +193,7 @@ namespace HattliApi.Serveries
             // {
             //     error = "البريد الإلكتروني مسجل من قبل";
             //     return error;
-            
+
 
             // }
             return error;
@@ -197,50 +224,60 @@ namespace HattliApi.Serveries
 
             if (loginUser == null)
             {
-                // Address? address=await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == loginUser.Id && t.DefaultAddress==true);
-                UserForRegister userForRegister = new UserForRegister
+                return new
                 {
-                    Password = "Abc123@",
-                    Role = userForLogin.Role,
-                    UserName = userForLogin.UserName
+                    status = false
                 };
+                // Address? address=await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == loginUser.Id && t.DefaultAddress==true);
+                // UserForRegister userForRegister = new UserForRegister
+                // {
+                //     Password = "Abc123@",
+                //     Role = userForLogin.Role,
+                //     UserName = userForLogin.UserName
+                // };
 
 
-                loginUser = _mapper.Map<User>(userForRegister);
-                loginUser.Role = userForRegister.Role;
-                if (!await _roleManager.RoleExistsAsync(userForRegister.Role))
-                    await _roleManager.CreateAsync(new IdentityRole(userForRegister.Role));
-                var result = await userManager.CreateAsync(loginUser, userForRegister.Password);
-                await userManager.AddToRoleAsync(loginUser, userForRegister.Role);
-                string Code = RandomNumber();
-                loginUser.Code = Code;
-                await _context.SaveChangesAsync();
+                //     loginUser = _mapper.Map<User>(userForRegister);
+                //     loginUser.Role = userForRegister.Role;
+                //     if (!await _roleManager.RoleExistsAsync(userForRegister.Role))
+                //         await _roleManager.CreateAsync(new IdentityRole(userForRegister.Role));
+                //     var result = await userManager.CreateAsync(loginUser, userForRegister.Password);
+                //     await userManager.AddToRoleAsync(loginUser, userForRegister.Role);
+                //     string Code = RandomNumber();
+                //     loginUser.Code = Code;
+                //     await _context.SaveChangesAsync();
             }
             else
             {
-                loginUser.DeviceToken = userForLogin.DeviceToken;
-                await _context.SaveChangesAsync();
-            }
-
-            // login 
-            if (userForLogin.Code == "0000")
-            {
 
 
-                var Token = await GenerateTokenAsync(loginUser);
-                return new
+
+                // login 
+                if (userForLogin.Code == loginUser.Code || userForLogin.Code == "0000")
                 {
-                    token = new JwtSecurityTokenHandler().WriteToken(Token),
-                    user = _mapper.Map<UserDetailResponse>(loginUser),
-                    expiration = Token.ValidTo,
-                    status = true,
-                    // address =address
-                };
+
+                    loginUser.DeviceToken = userForLogin.DeviceToken;
+                    await _context.SaveChangesAsync();
+
+                    var Token = await GenerateTokenAsync(loginUser);
+                    return new
+                    {
+                        token = new JwtSecurityTokenHandler().WriteToken(Token),
+                        user = _mapper.Map<UserDetailResponse>(loginUser),
+                        expiration = Token.ValidTo,
+                        status = true,
+                        // address =address
+                    };
+                }
+                else
+                {
+                    return new
+                    {
+                        status = false
+                    };
+                }
             }
-            return new
-            {
-                status = false
-            };
+
         }
 
         public async Task<bool> UpdateDeviceToken(string Token, string UserId)
@@ -260,10 +297,10 @@ namespace HattliApi.Serveries
             {
                 user!.FullName = userForUpdate.FullName;
             }
-            // if (userForUpdate.Email != null)
-            // {
-            //     user.Email = userForUpdate.Email;
-            // }
+            if (userForUpdate.ProfileImage != null)
+            {
+                user.ProfileImage = userForUpdate.ProfileImage;
+            }
             // if (userForUpdate.Points != null)
             // {
             //     user.Points = user.Points+userForUpdate.Points;

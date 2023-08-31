@@ -12,6 +12,7 @@ using HattliApi.Serveries.CategoriesServices;
 
 namespace HattliApi.Controllers
 {
+   
     [Route("category")]
     [ApiController]
     public class CategoriesController : Controller

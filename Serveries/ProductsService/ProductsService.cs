@@ -133,7 +133,7 @@ namespace HattliApi.Serveries.ProductsService
 
         public async Task<BaseResponse> GitProductsByCategoryId(string UserId, int categoryId, int page)
         {
-            List<Product> products = await _context.Products!.Where(x => x.CategoryId == categoryId).ToListAsync();
+            List<Product> products = await _context.Products!.Where(x => x.CategoryId == categoryId && x.Status == 0).ToListAsync();
             //   foreach (var item in products)
             //   {
             //      var cart = await _context.Carts!.FirstOrDefaultAsync(x => x.ProductId==item!.Id&&x.UserId==UserId);
@@ -144,6 +144,38 @@ namespace HattliApi.Serveries.ProductsService
 
 
             var pageResults = 10f;
+            var pageCount = Math.Ceiling(products.Count() / pageResults);
+
+            var items = await products
+                .Skip((page - 1) * (int)pageResults)
+                .Take((int)pageResults)
+                .ToListAsync();
+
+
+
+            BaseResponse baseResponse = new BaseResponse
+            {
+                Items = items,
+                CurrentPage = page,
+                TotalPages = (int)pageCount
+            };
+
+            return baseResponse;
+        }
+
+        public async Task<BaseResponse> GitProductsByProviderIdPage(int providerId, int page)
+        {
+             List<Product> products = await _context.Products!.Where(x => x.ProviderId == providerId && x.Status == 0).ToListAsync();
+            //   foreach (var item in products)
+            //   {
+            //      var cart = await _context.Carts!.FirstOrDefaultAsync(x => x.ProductId==item!.Id&&x.UserId==UserId);
+            //      if(cart!=null){
+            //         item!.Status =cart!.Quantity; 
+            //      }
+            //   }
+
+
+            var pageResults = 15f;
             var pageCount = Math.Ceiling(products.Count() / pageResults);
 
             var items = await products
@@ -174,35 +206,58 @@ namespace HattliApi.Serveries.ProductsService
             List<Product> allProducts = new List<Product>();
             // User? user=await _context.Users!.FirstOrDefaultAsync(t=> t.Id==userId);
             Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == userId);
+
+            // ** USER
             if (type == 0)
             {
-                allProducts = await _context.Products!.Where(t => t.Name!.Contains(textSearch)).ToListAsync();
+                allProducts = await _context.Products!.Where(t => t.Name!.Contains(textSearch) && t.Status == 0).ToListAsync();
+
+
+                foreach (Product item in allProducts)
+                {
+                    Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == item.ProviderId && t.Status == 1 && t.Wallet > -100);
+
+                    if (address != null && provider != null)
+                    {
+
+                        double distance = Functions.GetDistance(provider!.Lat, address!.Lng, address.Lat, provider.Lng);
+                        provider.Distance = distance;
+                        if (distance <= provider.Area)
+                        {
+                            products.Add(new SearchResponse
+                            {
+                                product = item,
+                                provider = provider
+                            });
+                        }
+
+                    }
+
+
+                }
             }
+
+            // *** provider
             else
             {
                 Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.UserId == userId);
                 allProducts = await _context.Products!.Where(t => t.Name!.Contains(textSearch) && t.ProviderId == provider!.Id).ToListAsync();
-            }
-
-
-            foreach (Product item in allProducts)
-            {
-                Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == item.ProviderId);
-
-                if (address != null && provider != null)
+                foreach (Product item in allProducts)
                 {
 
-                    double distance = Functions.GetDistance(provider!.Lat, address!.Lng, address.Lat, provider.Lng);
-                    provider.Distance = distance;
+
                     products.Add(new SearchResponse
                     {
                         product = item,
                         provider = provider
                     });
+
+
                 }
-
-
             }
+
+
+
             return products.OrderBy(t => t.provider!.Distance).ToList();
         }
 

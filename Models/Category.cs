@@ -10,6 +10,8 @@ namespace HattliApi.Models
 
         public int Id { get; set; }
         public string? Name { get; set; }
+
+        public string? NameEng { get; set; }
         public string? ImageUrl { get; set; }
         public int Status { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -18,6 +20,8 @@ namespace HattliApi.Models
         {
 
             CreatedAt = DateTime.Now;
+            Status=0;
+            
 
         }
           

@@ -100,29 +100,39 @@ namespace HatlliApi.Helpers
 
 
         // string modle, string modleId,,NotificationData notificationData
-        public static async Task<bool> SendNotificationAsync(AppDBcontext _context, string userId, int modelId, string title, string body, string image
+        public static async Task<bool> SendNotificationAsync(AppDBcontext _context, string userId, int modelId, string title, string body, string image, string type
         )
         {
+
             User? user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
-            Alert alert = new Alert()
+            Alert alertFind = await _context.Alerts.FirstOrDefaultAsync(x => x.PageId == modelId);
+            if (alertFind != null)
             {
-                Description = body,
-                title = title,
-                //     TitleEng=body,
-                //     BodyEng=title,
-                PageId = modelId,
-                //  //   Modle = modle ?? "user",
-                UserId = userId,
-                //     ModelId = "0000",
-                //     // Image = user.ProfileImage ?? "a.jpg",
-                //     IsRead = 1,
 
-            };
+                alertFind.Description = body;
+                alertFind.CreatedAt = DateTime.Now;
+            }
+            else
+            {
+                Alert alert = new Alert()
+                {
+                    Description = body,
+                    title = title,
+                    Type = type,
+                    //     TitleEng=body,
+                    //     BodyEng=title,
+                    PageId = modelId,
+                    //  //   Modle = modle ?? "user",
+                    UserId = userId,
+                    //     ModelId = "0000",
+                    //     // Image = user.ProfileImage ?? "a.jpg",
+                    //     IsRead = 1,
 
+                };
 
+                await _context.Alerts!.AddAsync(alert);
+            }
 
-
-            await _context.Alerts!.AddAsync(alert);
             await _context.SaveChangesAsync();
 
             string token = user!.DeviceToken!;
@@ -142,7 +152,7 @@ namespace HatlliApi.Helpers
                         body = body,
                         title = title,
                     },
-                  
+
                     click_action = "FLUTTER_NOTIFICATION_CLICK",
                     priority = "high",
                     modelId = modelId
@@ -157,6 +167,36 @@ namespace HatlliApi.Helpers
                 return result.StatusCode.Equals(HttpStatusCode.OK);
             }
         }
+
+
+        private static readonly HttpClient client = new HttpClient();
+
+        
+ public async Task sendSms(string code, string phone)
+    {
+
+        using (var client = new HttpClient())
+        {
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var data = new
+            {
+                userName = "hatli",
+                numbers = phone,
+                userSender = "hatli",
+                apiKey = "804ecc4281295b4dbda0b8a01fdffce0",
+                msg =  "رمز التحقق: "+ code
+            };
+
+            var json = JsonConvert.SerializeObject(data);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var result = await client.PostAsync("https://www.msegat.com/gw/sendsms.php", httpContent);
+            System.Diagnostics.Debug.WriteLine(result.Content.ReadAsStringAsync());
+        }
+
+    }
+
+      
 
     }
 
