@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace HatlliApi.Controllers
 {
     //  dotnet commends
+    // *** add ManualOrder to provider
+    //
     // dotnet publish --configuration Release
     // migrations dotnet
     // dotnet ef migrations add InitialCreate
@@ -19,6 +21,7 @@ namespace HatlliApi.Controllers
     // dotnet ef database update
     // create
     // dotnet new webapi -n name 
+    
 
     [ApiController]
     [Route("address")]

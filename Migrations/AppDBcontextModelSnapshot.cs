@@ -42,6 +42,35 @@ namespace HattliApi.Migrations
                     b.ToTable("Favorites");
                 });
 
+            modelBuilder.Entity("HatlliApi.Models.ManualOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Desc")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("ProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TotalCost")
+                        .HasColumnType("double");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ManualOrders");
+                });
+
             modelBuilder.Entity("HatlliApi.Models.OrderWallet", b =>
                 {
                     b.Property<int>("Id")
@@ -63,6 +92,23 @@ namespace HattliApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("OrderWallets");
+                });
+
+            modelBuilder.Entity("HatlliApi.Models.Setting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Settings");
                 });
 
             modelBuilder.Entity("HattliApi.Models.Address", b =>
@@ -220,6 +266,9 @@ namespace HattliApi.Migrations
                     b.Property<double>("TotalCost")
                         .HasColumnType("double");
 
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .HasColumnType("longtext");
 
@@ -359,6 +408,9 @@ namespace HattliApi.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("NameBunk")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Password")
                         .HasColumnType("longtext");
 
                     b.Property<double>("Rate")

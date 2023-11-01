@@ -17,7 +17,7 @@ namespace HatlliApi.ViewModels
 
         public int Users { get; set; }
 
-        public List<Provider>? LastProviders { get; set; }
+        public List<ProviderResponseDashBoard>? LastProviders { get; set; }
 
 
         public UserDetailResponse? AdminDetails { get; set; }

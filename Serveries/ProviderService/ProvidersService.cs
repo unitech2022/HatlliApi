@@ -219,7 +219,10 @@ namespace HattliApi.Serveries.ProvidersService
                 {
                     provider1.Title = provider.Title;
                 }
-
+                if (provider.About != null)
+                {
+                    provider1.About = provider.About;
+                }
                 if (provider.Email != null)
                 {
                     provider1.Email = provider.Email;
@@ -256,6 +259,7 @@ namespace HattliApi.Serveries.ProvidersService
                     provider1.NameBunk = provider.NameBunk;
                 }
 
+              
                 await _context.SaveChangesAsync();
 
 
@@ -296,7 +300,7 @@ namespace HattliApi.Serveries.ProvidersService
             /// **  must orders area
             //  var grouped = orders.GroupBy(item => item.UserId);
             //  var sorted = grouped.OrderByDescending(group => group.Count());
-            Address? address = new Address
+            Address address = new Address
             {
                 Id = 0,
                 Lat = 0.0,
@@ -360,6 +364,39 @@ namespace HattliApi.Serveries.ProvidersService
 
             await _context.SaveChangesAsync();
             return orderWallet;
+        }
+
+        public async Task<dynamic> ChangePhoneProvider(string email, string password, string userId)
+        {
+            User? user = await _context.Users.FirstOrDefaultAsync(t => t.Id == userId);
+            if (user != null)
+            {
+                Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Password == password && t.Email == email);
+                if (provider == null)
+                {
+
+                    return new
+                    {
+                        status = false,
+                        message = "الايميل او الرقم السرى غير صحيح"
+                    };
+                }
+                else
+                {
+                    provider.UserId = user.Id;
+                    await _context.SaveChangesAsync();
+                    return new
+                    {
+                        status = true,
+                        message = "تم تغيير الرقم بنجاح"
+                    };
+                }
+            }
+            return new
+            {
+                status = false,
+                message = "هذا الحساب غير مسجل"
+            };
         }
 
 

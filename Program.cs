@@ -18,6 +18,8 @@ using HatlliApi.Serveries.AlertsServices;
 using HattliApi.Serveries.HomeService;
 using HatlliApi.Serveries.DashboardServices;
 using HatlliApi.Serveries.RateServices;
+using HattliApi.Serveries.SettingsService;
+using HatlliApi.Serveries.ManualOrdersServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,14 +60,14 @@ builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IOrderItemsServices, OrderItemsServices>();
 builder.Services.AddScoped<IOrdersServices, OrdersServices>();
 builder.Services.AddScoped<IDashboardServices, DashboardServices>();
-// builder.Services.AddScoped<IAddressesServices, AddressesServices>();
+ builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IAlertsServices, AlertsServices>();
 // builder.Services.AddScoped<IAppConfigServices, AppConfigServices>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 // builder.Services.AddScoped<IMarketsService, MarketService>();
 // builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IRateServices, RateServices>();
-// builder.Services.AddScoped<IDashboardService, DashboardService>();
+ builder.Services.AddScoped<IManualOrdersServices, ManualOrdersServices>();
 
 //cors
 builder.Services.AddCors(
@@ -148,5 +150,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseFileServer();
 app.UseStaticFiles();
+app.UseDefaultFiles("/wwwroot/default.html");
 app.Run();

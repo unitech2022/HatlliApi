@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using HatlliApi.Helpers;
 using HatlliApi.Models;
 using HatlliApi.ViewModels;
 using HattliApi.Data;
@@ -30,6 +31,7 @@ namespace HatlliApi.Serveries.DashboardServices
 
         public async Task<DashboardHomeResponse> GetHomeDashboard(string userId)
         {
+            List<ProviderResponseDashBoard> providerResponseDashBoards = new List<ProviderResponseDashBoard>();
             List<Provider> lastProviders = new List<Provider>();
             User? user = await _context.Users.FirstOrDefaultAsync(t => t.Id == userId);
 
@@ -47,6 +49,18 @@ namespace HatlliApi.Serveries.DashboardServices
                 lastProviders = await _context.Providers!.OrderByDescending(t => t.CreatedAt).ToListAsync();
             }
 
+            foreach (var item in lastProviders)
+            {
+                User? user1 = await _context.Users.FirstOrDefaultAsync(t => t.Id == item.UserId);
+                UserDetailResponse userDetails = _mapper.Map<UserDetailResponse>(user1);
+
+                providerResponseDashBoards.Add(new ProviderResponseDashBoard
+                {
+                    provider = item,
+                    userDetail = userDetails
+                });
+            }
+
 
 
             UserDetailResponse adminUser = _mapper.Map<UserDetailResponse>(user);
@@ -57,7 +71,7 @@ namespace HatlliApi.Serveries.DashboardServices
                 Providers = providers,
                 Products = products,
                 Orders = orders,
-                LastProviders = lastProviders,
+                LastProviders = providerResponseDashBoards,
                 Users = users
 
             };
@@ -91,7 +105,7 @@ namespace HatlliApi.Serveries.DashboardServices
 
             }
 
-            var pageResults =30f;
+            var pageResults = 30f;
             var pageCount = Math.Ceiling(products.Count() / pageResults);
 
             var items = await products
@@ -110,6 +124,7 @@ namespace HatlliApi.Serveries.DashboardServices
 
         public async Task<BaseResponse> GetProviders(int page, string textSearch)
         {
+            List<ProviderResponseDashBoard> providerResponseDashBoards = new List<ProviderResponseDashBoard>();
             List<Provider> providers = new List<Provider>();
 
             if (textSearch == "not" || textSearch == null)
@@ -121,11 +136,23 @@ namespace HatlliApi.Serveries.DashboardServices
                 providers = await _context.Providers!.Where(t => t.Title!.Contains(textSearch)).ToListAsync();
             }
 
+            foreach (var item in providers)
+            {
+                User? user1 = await _context.Users.FirstOrDefaultAsync(t => t.Id == item.UserId);
+                UserDetailResponse userDetails = _mapper.Map<UserDetailResponse>(user1);
+
+                providerResponseDashBoards.Add(new ProviderResponseDashBoard
+                {
+                    provider = item,
+                    userDetail = userDetails
+                });
+            }
+
 
             var pageResults = 30f;
-            var pageCount = Math.Ceiling(providers.Count() / pageResults);
+            var pageCount = Math.Ceiling(providerResponseDashBoards.Count() / pageResults);
 
-            var items = await providers
+            var items = await providerResponseDashBoards
                 .Skip((page - 1) * (int)pageResults)
                 .Take((int)pageResults)
                 .ToListAsync();
@@ -182,7 +209,7 @@ namespace HatlliApi.Serveries.DashboardServices
 
             }
 
-            var pageResults = 10f;
+            var pageResults = 30f;
             var pageCount = Math.Ceiling(orders.Count() / pageResults);
 
             var items = await orders
@@ -316,15 +343,34 @@ namespace HatlliApi.Serveries.DashboardServices
 
                     }
                     // ** add 
-                }else {
-                    
-                     provider.Wallet = provider.Wallet + mony;
+                }
+                else
+                {
+
+                    provider.Wallet = provider.Wallet + mony;
                 }
 
             }
 
             await _context.SaveChangesAsync();
             return provider!;
+        }
+
+        public async Task<object> BlockUser(string userId, int status)
+        {
+           User? user =await _context.Users.FirstOrDefaultAsync(t => t.Id == userId);
+
+           if(user != null ){
+            user.Status = status;
+            if(status==0){
+ await Functions.SendNotificationAsync(_context, user!.Id!, 0, "تنبيه", "تم تفعيل رقم الهاتف", "", "orders");
+            }else {
+ await Functions.SendNotificationAsync(_context, user!.Id!, 0, "تنبيه", "تم حظر رقم الهاتف", "", "orders");
+            }
+              
+            await _context.SaveChangesAsync();
+           }
+           return user!;
         }
     }
 }

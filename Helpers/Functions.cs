@@ -105,7 +105,7 @@ namespace HatlliApi.Helpers
         {
 
             User? user = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
-            Alert alertFind = await _context.Alerts.FirstOrDefaultAsync(x => x.PageId == modelId);
+            Alert alertFind = await _context.Alerts!.FirstOrDefaultAsync(x => x.PageId == modelId);
             if (alertFind != null)
             {
 

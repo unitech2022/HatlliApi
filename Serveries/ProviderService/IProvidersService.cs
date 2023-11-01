@@ -25,6 +25,8 @@ Task<Provider> GitProviderByUserId(string  userId);
 
           Task<dynamic> ReviewProvider(string userId,string from ,int to);
 
+            Task<dynamic> ChangePhoneProvider(string email,string password ,string userId);
+
             Task<dynamic> BalanceWithdrawalProvider(string userId,double mony ,int type);
 
     }

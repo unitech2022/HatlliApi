@@ -1,0 +1,8 @@
+{
+    "omnisharp.autoStart": true,
+    "indentRainbow.ignoreErrorLanguages": [
+
+        "markdown"
+    ],
+    "omnisharp.disableMSBuildDiagnosticWarning": false
+}

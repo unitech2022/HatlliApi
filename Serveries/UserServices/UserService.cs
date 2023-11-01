@@ -110,17 +110,30 @@ namespace HattliApi.Serveries
 
             if (user != null)
             {
-                user.Code = Code;
-                await _context.SaveChangesAsync();
-
-               await SendSms(Code, UserName);
-
-
-                return new
+                if (user.Status == 2)
                 {
-                    status = 1,
-                    Code = Code,
-                };
+                    return new
+                    {
+                        status = 2, // *** deleted account
+                        Code = "0000",
+                    };
+                }
+
+                else
+                {
+                    user.Code = Code;
+                    await _context.SaveChangesAsync();
+
+                    await SendSms(Code, UserName);
+
+
+                    return new
+                    {
+                        status = 1,
+                        Code = Code,
+                    };
+                }
+
 
             }
             else
@@ -348,7 +361,19 @@ namespace HattliApi.Serveries
             return userDetail!;
         }
 
+        public async Task<User> DelateAccount(string UserId)
+        {
+            User? user = await _context.Users!.Where(x => x.Id == UserId).FirstOrDefaultAsync();
+            if (user != null)
+            {
 
+                user.Status = 2;
+                await _context.SaveChangesAsync();
+
+
+            }
+            return user!;
+        }
     }
 }
 

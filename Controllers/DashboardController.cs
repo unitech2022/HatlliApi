@@ -40,7 +40,7 @@ namespace HatlliApi.Controllers
             return Ok(await _repository.GetProviders(page, textSearch));
         }
 
-      [HttpPost]
+        [HttpPost]
         [Route("get-categories")]
         public async Task<ActionResult> GetCategories()
         {
@@ -54,6 +54,14 @@ namespace HatlliApi.Controllers
         public async Task<ActionResult> UpdateProviderStatus([FromForm] int providerId, [FromForm] int status)
         {
             return Ok(await _repository.UpdateStatusProvider(providerId, status));
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        [Route("block-user")]
+        public async Task<ActionResult> BlockUser([FromForm] string userId, [FromForm] int status)
+        {
+            return Ok(await _repository.BlockUser(userId, status));
         }
 
         [Authorize(Roles = "admin")]
@@ -108,9 +116,9 @@ namespace HatlliApi.Controllers
         [Authorize(Roles = "admin")]
         [HttpPost]
         [Route("payment-provider")]
-        public async Task<ActionResult> payMentProvider([FromForm] string userId, [FromForm] double mony ,[FromForm] int type)
+        public async Task<ActionResult> payMentProvider([FromForm] string userId, [FromForm] double mony, [FromForm] int type)
         {
-            return Ok(await _repository.PaymentProvider(userId, mony,type));
+            return Ok(await _repository.PaymentProvider(userId, mony, type));
         }
     }
 }

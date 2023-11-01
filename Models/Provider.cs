@@ -37,7 +37,11 @@ namespace HattliApi.Models
 
         public double Rate { get; set; }
 
+        public string? Password { get; set; }
+
         public int Status { get; set; }
+
+        //  public bool ManualOrder { get; set; }
 
         public double discount { get; set; }
 
@@ -58,6 +62,7 @@ namespace HattliApi.Models
             Lng = 0.0;
             Rate = 0.0;
             Wallet = 0.0;
+         
 
         }
 

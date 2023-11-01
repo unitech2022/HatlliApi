@@ -14,6 +14,8 @@ namespace HattliApi.Serveries
 		Task<object> UpdateUser(UserForUpdate userForUpdate);
 
 		Task<bool> UpdateDeviceToken(string Token,string UserId);
+
+		Task<User> DelateAccount(string UserId);
 		Task<UserDetailResponse> GetUser(string UserId);
 	}
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using AutoMapper;
 using HatlliApi.Helpers;
+using HatlliApi.Models;
 using HatlliApi.ViewModels;
 using HattliApi.Data;
 using HattliApi.Models;
@@ -14,6 +15,11 @@ using Microsoft.EntityFrameworkCore;
 
 using X.PagedList;
 
+
+/// ** tax 
+//** 1 - ٣ ريال ضريبة توصيل  
+//** 2 - ضريبة ميسر  %15
+// ** 
 
 
 
@@ -27,7 +33,6 @@ namespace HatlliApi.Serveries.OrdersServices
 
         private readonly AppDBcontext _context;
 
-
         // private readonly IAddressesServices _AddressesServices;
         // private readonly IMarketsService _IMarketsService;
         // -1 =>  "تم الالغاء"
@@ -38,17 +43,13 @@ namespace HatlliApi.Serveries.OrdersServices
         // 4 =>  "جارى التوصيل"
         // 5 =>  "تم التسليم"
 
-
         List<string> orderStatuses = new List<string>(new string[] { "في انتظار التأكيد", "تم تأكيد طلبك", "جارى التجهيز", "تم التسليم", "تم الغاء الطلب" });
-        public OrdersServices(IMapper mapper, AppDBcontext context
-        // IAddressesServices addressesServices,
-        //  IMarketsService iMarketsService
-         )
+        public OrdersServices(IMapper mapper, AppDBcontext context)
         {
+
             _mapper = mapper;
             _context = context;
-            // _AddressesServices = addressesServices;
-            // _IMarketsService = iMarketsService;
+
         }
         public async Task<dynamic> AddAsync(dynamic type)
         {
@@ -64,8 +65,16 @@ namespace HatlliApi.Serveries.OrdersServices
             return type;
         }
 
+
+        // *** payment  => 0 cash &&  1 payment 
         public async Task<dynamic> AddOrder(string userId, int payment, string nots)
         {
+
+            //** taxes 
+            Setting? deliveryCost = await _context.Settings!.FirstOrDefaultAsync(t => t.Name == "DeliveryCost");
+
+             Setting? paymentCost = await _context.Settings!.FirstOrDefaultAsync(t => t.Name == "PaymentCost");
+
             List<Cart> carts = await _context.Carts!.Where(x => x.UserId == userId).ToListAsync();
 
 
@@ -77,39 +86,25 @@ namespace HatlliApi.Serveries.OrdersServices
             Provider? market = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == carts.First().ProviderId);
 
             // double distance = Functions.GetDistance(address.Lat, market.Lat, address.Lng, market.Lng);
+
             double productsCost = carts.Sum(i => i.Cost);
-            if (payment == 1)
-            {
-                productsCost += 1;
-            }
+            // if (payment == 1)
+            // {
+            //     productsCost += 1;
+            // }
             // double.Parse(appConfigDeliveryCost.Value ?? "0.0") 
-            // double deliveryCost = 0.0 * distance;
-
-            double tax = productsCost * .15;
-
-            // double totalCost = productsCost + deliveryCost + tax;
-
-            if (payment == 0)
-            {
-
-                market!.Wallet -= tax;
 
 
-            }
-            else
-            {
-                double points = productsCost - tax;
-                market!.Wallet += points;
-            }
 
 
-            Order order = new Order
+
+            Order order = new()
             {
                 ProviderId = market!.Id,
                 UserId = userId,
                 Notes = nots,
                 payment = payment,
-                TotalCost = productsCost + 2,
+                TotalCost = productsCost + double.Parse(deliveryCost!.Value ?? "0.0"),
                 ProductsCost = productsCost,
 
             };
@@ -140,6 +135,28 @@ namespace HatlliApi.Serveries.OrdersServices
             return order;
         }
 
+        public async Task<dynamic> AddManualOrder(ManualOrder manualOrder)
+        {
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == manualOrder.ProviderId);
+
+
+            Order order = new Order
+            {
+                ProviderId = provider!.Id,
+                UserId = manualOrder.UserId,
+                Notes = manualOrder.Desc,
+                payment = 0,
+                TotalCost = 0.0,
+                Type = 1,
+                ProductsCost = 0.0,
+
+            };
+
+            await _context.Orders!.AddAsync(order);
+            _context.SaveChanges();
+            await Functions.SendNotificationAsync(_context, provider!.UserId!, order.Id, "طلب جديد", "تم ارسال طلب جديد", "", "ManualOrders");
+            return order;
+        }
 
         public async Task<dynamic> DeleteAsync(int typeId)
         {
@@ -160,12 +177,35 @@ namespace HatlliApi.Serveries.OrdersServices
 
             //** sender ==0 user || 1  provider
             Order? order = await _context.Orders!.FirstOrDefaultAsync(x => x.Id == typeId);
+            List<Cart> carts = await _context.Carts!.Where(x => x.UserId == order!.UserId).ToListAsync();
+            double productsCost = carts.Sum(i => i.Cost);
             Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == order!.ProviderId);
             if (order != null)
             {
                 order.Status = status;
 
-                if (status == 4)
+                if (status == 1)
+                {
+                    double tax = productsCost * .15;
+
+                    // double totalCost = productsCost + deliveryCost + tax;
+
+                    if (order.payment == 0)
+                    {
+
+                        provider!.Wallet -= 3;
+
+
+                    }
+                    else
+                    {
+                        double points = productsCost - 3;
+                        provider!.Wallet += points;
+                    }
+
+                }
+
+                else if (status == 4)
                 {
                     double tax = order.ProductsCost * .15;
                     if (order.payment == 0)
@@ -182,8 +222,11 @@ namespace HatlliApi.Serveries.OrdersServices
                     }
                 }
 
+
+                // ** send notification 
                 if (sender == 0)
                 {
+
                     await Functions.SendNotificationAsync(_context, provider!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "", "orders");
 
 
@@ -191,17 +234,31 @@ namespace HatlliApi.Serveries.OrdersServices
                 else
                 {
 
-
-
                     await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[status], "", "orders");
-
-
 
 
                 }
 
 
                 await _context.SaveChangesAsync();
+            }
+
+            return order!;
+        }
+
+        public async Task<dynamic> ConfirmManualOrderStatus(int typeId, double price)
+        {
+            Order? order = await _context.Orders!.FirstOrDefaultAsync(x => x.Id == typeId);
+            Provider? provider = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == order!.ProviderId);
+            if (order != null)
+            {
+                order.Status = 1;
+                order.TotalCost = price;
+                double tax = price * .15;
+                provider!.Wallet -= tax;
+                await _context.SaveChangesAsync();
+                await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[1], "", "orders");
+
             }
 
             return order!;
@@ -219,7 +276,6 @@ namespace HatlliApi.Serveries.OrdersServices
             {
                 provider!.Wallet -= tax;
 
-
             }
             else
             {
@@ -229,10 +285,7 @@ namespace HatlliApi.Serveries.OrdersServices
             order.Status = 3;
             await _context.SaveChangesAsync();
             await Functions.SendNotificationAsync(_context, order!.UserId!, order.Id, "تعديل حالة الطلب", orderStatuses[3], "", "orders");
-
             return order;
-
-
         }
 
         public async Task<dynamic> GetItems(string UserId, int page)
@@ -265,7 +318,6 @@ namespace HatlliApi.Serveries.OrdersServices
             Order? order = await _context.Orders!.FirstOrDefaultAsync(x => x.Id == typeId);
             return order!;
         }
-
         public async Task<dynamic> GitOrderDetails(int orderId)
         {
             List<OrderItem> orderItems = await _context.OrderItems!.Where(t => t.OrderId == orderId).ToListAsync();
@@ -332,8 +384,6 @@ namespace HatlliApi.Serveries.OrdersServices
         {
             // nothing
         }
-
-
         // private async Task<AppConfig> getConfigKey(string key)
         // {
         //     AppConfig? appConfig = await _context.AppConfigs!.FirstOrDefaultAsync(x => x.Key == key);
@@ -343,8 +393,6 @@ namespace HatlliApi.Serveries.OrdersServices
         public async Task<dynamic> GitOrdersByMarketId(int marketId)
         {
             List<Order> orders = await _context.Orders!.OrderByDescending(t => t.CreatedAt).Where(t => t.ProviderId == marketId).ToListAsync();
-
-
             return new
             {
                 successOrders = orders.Where(t => t.Status <= 3 && t.Status != 0).ToList(),
@@ -376,6 +424,15 @@ namespace HatlliApi.Serveries.OrdersServices
 
             return orders;
         }
+
+        public async Task<User> GetUser(string userId)
+        {
+            User? user = await _context.Users.FirstOrDefaultAsync(t => t.Id == userId);
+
+            return user!;
+        }
+
+
 
 
 

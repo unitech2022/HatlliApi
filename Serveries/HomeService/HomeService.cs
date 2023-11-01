@@ -32,8 +32,8 @@ namespace HattliApi.Serveries.HomeService
 
         public async Task<ResponseHomeProvider> GetHomeDataProvider(string UserId)
         {
-            List<OrderHome> orders = new List<OrderHome> { };
-            List<Product> products = new List<Product> { };
+            List<OrderHome> orders = new() { };
+            List<Product> products = new() { };
             //** address
             Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == UserId);
             //** user
@@ -50,11 +50,11 @@ namespace HattliApi.Serveries.HomeService
             if (provider != null)
             {
                 //** products
-                products = await _context.Products!.OrderByDescending(t=> t.CreatedAt).Where(t => t.ProviderId == provider!.Id).ToListAsync();
+                products = await _context.Products!.OrderByDescending(t => t.CreatedAt).Where(t => t.ProviderId == provider!.Id).ToListAsync();
 
                 // ** orders 
 
-                List<Order> allOrders = await _context.Orders!.OrderByDescending(t=> t.CreatedAt).Where(t => t.ProviderId == provider!.Id).ToListAsync();
+                List<Order> allOrders = await _context.Orders!.OrderByDescending(t => t.CreatedAt).Where(t => t.ProviderId == provider!.Id).ToListAsync();
 
                 foreach (var item in allOrders)
                 {
@@ -87,11 +87,11 @@ namespace HattliApi.Serveries.HomeService
 
         }
 
-        public async Task<ResponseHomeUser> GetHomeUserData(string UserId)
+        public async Task<ResponseHomeUser> GetHomeUserData(string UserId,string location)
         {
-            List<Order> allOrders = new List<Order> { };
-            List<Provider> providers = new List<Provider> { };
-            List<OrderHome> orders = new List<OrderHome> { };
+            List<Order> allOrders = new() { };
+            List<Provider> providers = new() { };
+            List<OrderHome> orders = new() { };
             //** address
             Address? address = await _context.Addresses!.FirstOrDefaultAsync(t => t.UserId == UserId);
             //** categories
@@ -103,14 +103,14 @@ namespace HattliApi.Serveries.HomeService
             // ** carts
             List<Cart> carts = await _context.Carts!.Where(t => t.UserId == UserId).ToListAsync();
             //** get providers
-            List<Provider> allProviders = await _context.Providers!.Where(t=>t.Status==1 && t.Wallet> -100).ToListAsync();
+            List<Provider> allProviders = await _context.Providers!.Where(t => t.Status == 1 && t.Wallet > -100).ToListAsync();
             // get distance
             if (address != null)
             {
 
                 foreach (Provider item in allProviders)
                 {
-                  
+
                     double distance = Functions.GetDistance(item.Lat, address!.Lng, address.Lat, item.Lng);
                     if (distance <= item.Area)
                     {
@@ -123,41 +123,56 @@ namespace HattliApi.Serveries.HomeService
 
                 }
             }
-
-            // ** orders
-            allOrders = await _context.Orders!.OrderByDescending(t=> t.CreatedAt).Where(t => t.UserId == UserId).ToListAsync();
-            foreach (var item in allOrders)
+            else if(location!=null)
             {
-                Provider? provider1 = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == item.ProviderId);
-                orders.Add(new OrderHome
+                double lat=double.Parse(location.Split(",")[0]);
+                 double lng=double.Parse(location.Split(",")[1]);
+                
+                foreach (Provider item in allProviders)
                 {
-                    order = item,
-                    name = provider1!.Title,
-                    imageUrl = provider1!.LogoCompany
-                });
+
+                    double distance = Functions.GetDistance(item.Lat, lng, lat, item.Lng);
+                    if (distance <= item.Area)
+                    {
+                        item.Distance = distance;
+                        providers.Add(item);
+                    }
+                }}
+
+                // ** orders
+                allOrders = await _context.Orders!.OrderByDescending(t => t.CreatedAt).Where(t => t.UserId == UserId).ToListAsync();
+                foreach (var item in allOrders)
+                {
+                    Provider? provider1 = await _context.Providers!.FirstOrDefaultAsync(t => t.Id == item.ProviderId);
+                    orders.Add(new OrderHome
+                    {
+                        order = item,
+                        name = provider1!.Title,
+                        imageUrl = provider1!.LogoCompany
+                    });
+
+                }
+
+                // ** favorites
+
+                List<Favorite> favorites = await _context.Favorites!.Where(t => t.UserId == UserId).ToListAsync();
+                return new ResponseHomeUser
+                {
+                    address = address,
+                    providers = providers,
+                    orders = orders,
+                    NotiyCount = alerts.Count(),
+                    user = userDetail,
+                    favorites = favorites,
+                    carts = carts,
+                    categories = categories,
+
+                };
+
+
 
             }
 
-            // ** favorites
-
-            List<Favorite> favorites = await _context.Favorites!.Where(t => t.UserId == UserId).ToListAsync();
-            return new ResponseHomeUser
-            {
-                address = address,
-                providers = providers,
-                orders = orders,
-                NotiyCount = alerts.Count(),
-                user = userDetail,
-                favorites = favorites,
-                carts = carts,
-                categories = categories,
-
-            };
-
-
 
         }
-
-
     }
-}

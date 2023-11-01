@@ -28,10 +28,10 @@ namespace HatlliApi.Controllers
 
         [HttpGet]
         [Route("get-home-data")]
-        public async Task<ActionResult> GetFields([FromQuery] string UserId)
+        public async Task<ActionResult> GetFields([FromQuery] string UserId,[FromQuery] string  location)
         {
 
-            return Ok(await _repository.GetHomeUserData(UserId));
+            return Ok(await _repository.GetHomeUserData(UserId,location));
         }
 
 

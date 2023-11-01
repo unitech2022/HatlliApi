@@ -10,7 +10,7 @@ namespace HattliApi.Models
 
       
         public string? DeviceToken { get; set; }
-        public int? Status { get; set; }
+        public int? Status { get; set; } // ** 0 active  1 == blocked  2 == stopping
 
     
         public string? Code { get; set; }

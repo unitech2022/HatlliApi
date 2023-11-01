@@ -109,7 +109,13 @@ namespace HattliApi.Controllers
 
             return Ok(await _repository.UpdateProvider(provider));
         }
+        [HttpPost]
+        [Route("change-phone-provider")]
+        public async Task<ActionResult> ChangePhoneProvider([FromForm] string userId, [FromForm] string email, [FromForm] string password)
+        {
 
+            return Ok(await _repository.ChangePhoneProvider(email, password, userId));
+        }
 
         [HttpPost]
         [Route("review-provider")]

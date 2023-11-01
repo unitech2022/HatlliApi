@@ -37,17 +37,15 @@ namespace HattliApi.Data
 
         public DbSet<OrderItem>? OrderItems { get; set; }
 
-       public DbSet<OrderWallet>? OrderWallets { get; set; }
+        public DbSet<OrderWallet>? OrderWallets { get; set; }
 
-
-
-        // public DbSet<ProductsOption>? ProductsOptions { get; set; }
+        public DbSet<Setting>? Settings { get; set; }
 
         //  public DbSet<Market>? Markets { get; set; }
 
-           public DbSet<Rate>? Rates { get; set; }
+        public DbSet<Rate>? Rates { get; set; }
 
-        //  public DbSet<Coupon>? Coupons { get; set; }
+        public DbSet<ManualOrder>? ManualOrders { get; set; }
 
 
 

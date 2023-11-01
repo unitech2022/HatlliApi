@@ -19,9 +19,9 @@ namespace HattliApi.Models
         public string? UserId { get; set; }
 
         public double TotalCost { get; set; }
-        public int payment { get; set; }
+        public int payment { get; set; }   // *** => 0 cash &&  1 payment
 
-        // public double DeliveryCost { get; set; }
+        public int Type { get; set; }  // *** => 0 normal (cart) &&  1 manual without cart
 
         public double ProductsCost { get; set; }
 

@@ -11,7 +11,7 @@ namespace HattliApi.Serveries.HomeService
 {
     public interface IHomeService 
     {
-          Task<ResponseHomeUser> GetHomeUserData(string UserId);
+          Task<ResponseHomeUser> GetHomeUserData(string UserId,string location);
 
           
 

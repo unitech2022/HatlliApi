@@ -9,6 +9,7 @@ using AutoMapper;
 using HatlliApi.Serveries.OrdersServices;
 using HattliApi.Models;
 using HattliApi.Dtos;
+using HatlliApi.Models;
 
 namespace HatlliApi.Controllers
 {
@@ -38,15 +39,29 @@ namespace HatlliApi.Controllers
 
         [HttpPost]
         [Route("add-order")]
-        public async Task<ActionResult> AddOrder([FromForm] string userId, [FromForm] int payment,[FromForm]string nots)
+        public async Task<ActionResult> AddOrder([FromForm] string userId, [FromForm] int payment, [FromForm] string nots)
         {
 
+            // User user = await _repository.GetUser(userId);
+            // if (user.Status == 1)
+            // {
+            //     return Unauthorized();
+            // }
 
-            var order = await _repository.AddOrder(userId, payment,nots);
+            var order = await _repository.AddOrder(userId, payment, nots);
 
             return Ok(order);
         }
+        [HttpPost]
+        [Route("add-manual-order")]
+        public async Task<ActionResult> AddOrder([FromForm] ManualOrder manualOrder)
+        {
 
+
+            var order = await _repository.AddManualOrder(manualOrder);
+
+            return Ok(order);
+        }
 
         [HttpGet]
         [Route("get-Orders")]
@@ -116,6 +131,18 @@ namespace HatlliApi.Controllers
             return Ok(await _repository.UpdateOrderStatus(orderId, status, sender));
 
         }
+
+        [HttpPut]
+        [Route("confirm-manual-Order")]
+        public async Task<ActionResult> ConfirmManuaOrderStatus([FromForm] double price, [FromForm] int orderId)
+
+        {
+
+
+            return Ok(await _repository.ConfirmManualOrderStatus(orderId, price));
+
+        }
+
 
         [HttpPut]
         [Route("payment-Order")]

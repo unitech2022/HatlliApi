@@ -27,6 +27,9 @@ namespace HatlliApi.Serveries.DashboardServices
            Task<object> UpdateStatusWallet(int walletId,int status);   
             Task<object> UpdateStatusProduct(int productId,int status);   
 
+
+              Task<object> BlockUser(string userId,int status);   
+
               Task<BaseResponse> GetOrders(int page);
 
                 Task<dynamic> PaymentProvider(string userId , double mony,int type );
